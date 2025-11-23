@@ -1,0 +1,31 @@
+services:
+  crm:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT}:8000"
+    command: >
+      sh -c "python manage.py wait_db && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
+  web:
+    image: nginx:alpine
+    ports:
+      - "${FRONTEND_PORT}:80"
+    volumes:
+      - ./client:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+#  frontend:
+#    build:
+#      context: ./next_frontend
+#      dockerfile: Dockerfile
+#    ports:
+#      - "${NEXT_FRONTEND_PORT}:3000"
+#    volumes:
+#      - ./next_frontend:/app
+#      - /app/node_modules
