@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
-from .models import StatusChoices, CoursesChoices, CoursesTypeChoices, CoursesFormatChoices
-from .serializers import OrdersSerializer
+from apps.crm.models.orders_model import CoursesChoices, CoursesTypeChoices, CoursesFormatChoices, StatusChoices
+from apps.crm.serializers.orders_serializers import OrdersSerializer
 
 
 class OrderFilter(filters.FilterSet):

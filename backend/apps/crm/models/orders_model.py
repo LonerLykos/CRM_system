@@ -1,42 +1,8 @@
 from django.db import models
+from apps.crm.models.choices_models import CoursesChoices, CoursesFormatChoices, CoursesTypeChoices, StatusChoices
+from apps.crm.models.group_model import GroupModel
 from apps.users.models import UserModel
 from core.models import BaseModel
-
-
-class GroupModel(BaseModel):
-    class Meta:
-        db_table = 'groups'
-    name = models.CharField(max_length=100, unique=True, blank=True)
-
-
-class StatusChoices(models.TextChoices):
-    IN_WORK = 'In Work'
-    NEW = 'New'
-    AGREE = 'Agree'
-    DISAGREE = 'Disagree'
-    DUBBING = 'Dubbing'
-
-
-class CoursesChoices(models.TextChoices):
-    FS = 'FS'
-    QACX = 'QACX'
-    JCX = 'JCX'
-    JSCX = 'JSCX'
-    FE = 'FE'
-    PCX = 'PCX'
-
-
-class CoursesTypeChoices(models.TextChoices):
-    PRO = 'Pro'
-    MINIMAL = 'Minimal'
-    PREMIUM = 'Premium'
-    INCUBATOR = 'Incubator'
-    VIP = 'VIP'
-
-
-class CoursesFormatChoices(models.TextChoices):
-    STATIC = 'Static'
-    ONLINE = 'Online'
 
 
 class OrdersModel(BaseModel):
@@ -79,13 +45,3 @@ class OrdersModel(BaseModel):
     )
     group = models.ForeignKey(GroupModel, related_name='orders', on_delete=models.SET_NULL, null=True)
     manager = models.ForeignKey(UserModel, related_name='orders', on_delete=models.SET_NULL, null=True)
-
-
-class CommentsModel(BaseModel):
-    class Meta:
-        db_table = 'comments'
-        ordering = ['-id']
-
-    order = models.ForeignKey(OrdersModel, related_name='comments', on_delete=models.CASCADE)
-    user = models.ForeignKey(UserModel, related_name='comments', on_delete=models.CASCADE)
-    comment = models.TextField(blank=False)

@@ -1,25 +1,6 @@
 from rest_framework import serializers
-from .models import OrdersModel, CommentsModel
-
-
-class CommentsSerializer(serializers.ModelSerializer):
-    user_name = serializers.CharField(source="user.name", read_only=True)
-    class Meta:
-        model = CommentsModel
-        fields = (
-            "comment",
-            "user_name",
-        )
-
-
-class CommentCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CommentsModel
-        fields = ("comment",)
-
-    def create(self, validated_data):
-        validated_data["user"] = self.context["request"].user
-        return super().create(validated_data)
+from apps.crm.models.orders_model import OrdersModel
+from apps.crm.serializers.comments_serializers import CommentsSerializer
 
 
 class OrdersSerializer(serializers.ModelSerializer):

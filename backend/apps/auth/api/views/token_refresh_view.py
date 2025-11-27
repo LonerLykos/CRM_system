@@ -34,7 +34,7 @@ class CookieTokenRefreshView(TokenRefreshView):
         access_token = data['access']
         refresh_token = data['refresh']
 
-        response = Response(status=status.HTTP_200_OK)
-        response.data = self.usecase.execute(access_token, refresh_token, response)
+        response = Response()
+        response = self.usecase.execute(access_token, refresh_token, response)
 
         return response
