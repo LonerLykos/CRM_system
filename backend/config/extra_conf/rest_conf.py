@@ -12,4 +12,5 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated', 'core.permissions.is_unbanned_user.IsUnbannedUser',
     ],
+    'EXCEPTION_HANDLER': 'core.handlers.error_handler.error_handler',
 }

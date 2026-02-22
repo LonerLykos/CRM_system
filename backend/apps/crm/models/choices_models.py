@@ -2,30 +2,30 @@ from django.db import models
 
 
 class StatusChoices(models.TextChoices):
-    IN_WORK = 'In Work'
-    NEW = 'New'
-    AGREE = 'Agree'
-    DISAGREE = 'Disagree'
-    DUBBING = 'Dubbing'
+    NEW = 'new', 'New'
+    IN_WORK = 'in_work', 'In Work'
+    AGREE = 'agree', 'Agree'
+    DISAGREE = 'disagree', 'Disagree'
+    DUBBING = 'dubbing', 'Dubbing'
 
 
 class CoursesChoices(models.TextChoices):
-    FS = 'FS'
-    QACX = 'QACX'
-    JCX = 'JCX'
-    JSCX = 'JSCX'
-    FE = 'FE'
-    PCX = 'PCX'
+    FS = 'FS', 'Fullstack'
+    QACX = 'QAСX', 'QA Complex'
+    JCX = 'JCX', 'Java Complex'
+    JSCX = 'JSCX', 'JavaScript Complex'
+    FE = 'FE', 'Frontend'
+    PCX = 'PCX', 'Python Complex'
 
 
 class CoursesTypeChoices(models.TextChoices):
-    PRO = 'Pro'
-    MINIMAL = 'Minimal'
-    PREMIUM = 'Premium'
-    INCUBATOR = 'Incubator'
-    VIP = 'VIP'
+    PRO = 'pro', 'Pro'
+    MINIMAL = 'minimal', 'Minimal'
+    PREMIUM = 'premium', 'Premium'
+    INCUBATOR = 'incubator', 'Incubator'
+    VIP = 'vip', 'VIP'
 
 
 class CoursesFormatChoices(models.TextChoices):
-    STATIC = 'Static'
-    ONLINE = 'Online'
+    STATIC = 'static', 'Static'
+    ONLINE = 'online', 'Online'

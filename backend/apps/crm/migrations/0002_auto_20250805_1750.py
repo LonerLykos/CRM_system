@@ -3,6 +3,7 @@
 import os
 import json
 from django.db import migrations
+from apps.crm.logic import normalize_order_choices
 
 
 def load_initial_orders_data(apps, schema_editor):
@@ -14,9 +15,10 @@ def load_initial_orders_data(apps, schema_editor):
         orders = json.load(f)
 
     for order in orders:
-        Order.objects.create(
-            **order
-        )
+
+        normalized_data = normalize_order_choices(order)
+
+        Order.objects.create(**normalized_data)
 
 
 def unload_initial_orders_data(apps, schema_editor):

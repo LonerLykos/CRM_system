@@ -5,6 +5,11 @@ from apps.users.models import UserModel
 from core.models import BaseModel
 
 
+class OrderQuerySet(models.QuerySet):
+    def with_prefetches(self):
+        return self.select_related('manager', 'group').prefetch_related('comments')
+
+
 class OrdersModel(BaseModel):
     class Meta:
         db_table = 'orders'
@@ -45,3 +50,5 @@ class OrdersModel(BaseModel):
     )
     group = models.ForeignKey(GroupModel, related_name='orders', on_delete=models.SET_NULL, null=True)
     manager = models.ForeignKey(UserModel, related_name='orders', on_delete=models.SET_NULL, null=True)
+
+    objects = OrderQuerySet.as_manager()

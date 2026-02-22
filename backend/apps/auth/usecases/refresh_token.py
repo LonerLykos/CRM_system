@@ -1,4 +1,6 @@
 import structlog
+from django.db import transaction
+
 from apps.auth.repositories.token_repository import TokenRepository
 from apps.auth.services.cookie_service import CookieService
 
@@ -10,12 +12,8 @@ class RefreshTokenUseCase:
         self.token_repository = token_repository
 
     def execute(self, access_token: str, refresh_token: str, response):
-        self.cookie_service.set_auth_cookies(response, access_token, refresh_token)
 
-        try:
-            self.token_repository.blacklist(refresh_token)
-        except Exception:
-            log.exception("Failed to blacklist old refresh token")
+        self.cookie_service.set_auth_cookies(response, access_token, refresh_token)
 
         response.data = {"message": "Successful"}
         response.status_code = 200

@@ -23,7 +23,7 @@ class OrderFilter(filters.FilterSet):
         fields=OrdersSerializer.Meta.fields
     )
 
-    def filter_my_orders(self, queryset, name, value):
-        if value and self.request.user.is_authenticated: #переглянути пізніше
+    def filter_my_orders(self, queryset, value):
+        if value and self.request.user.is_authenticated:
             return queryset.filter(manager=self.request.user)
         return queryset
