@@ -4,7 +4,7 @@ from apps.crm.selectors.order_selectors import OrderSelector
 from apps.crm.serializers.orders_serializers import OrdersSerializer
 
 
-class OrdersListAPIView(ListAPIView):
+class OrdersListView(ListAPIView):
     serializer_class = OrdersSerializer
     filterset_class = OrderFilter
 

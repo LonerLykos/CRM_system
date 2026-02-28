@@ -1,0 +1,7 @@
+services:
+  frontend:
+    build:
+      dockerfile: Dockerfile_prod
+    restart: always
+    environment:
+      - NODE_ENV=production

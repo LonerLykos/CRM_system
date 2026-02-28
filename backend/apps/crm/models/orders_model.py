@@ -14,6 +14,7 @@ class OrdersModel(BaseModel):
     class Meta:
         db_table = 'orders'
         ordering = ['-id']
+
     name = models.CharField(max_length=25, blank=True, null=True)
     surname = models.CharField(max_length=25, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
