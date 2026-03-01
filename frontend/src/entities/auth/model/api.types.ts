@@ -11,5 +11,5 @@ export interface ICurrentUser {
     name: string;
     surname: string;
     is_staff: boolean | string;
-    avatar_hash?: string;
+    avatar_hash: string;
 }
