@@ -1,4 +1,4 @@
-import Menu from "@/components/menu/Menu";
+import Menu from "@/widgets/menu/Menu";
 import {Metadata} from "next";
 import './globals.css'
 

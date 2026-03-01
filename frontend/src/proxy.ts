@@ -1,11 +1,11 @@
 import {NextResponse} from 'next/server'
 import type {NextRequest} from 'next/server'
 
-export function proxy(request: NextRequest) {
-    if (request.nextUrl.pathname.startsWith('/api')) {
+export default function proxy(request: NextRequest) {
+    if (request.nextUrl.pathname.startsWith('')) {
 
         const targetPath = request.nextUrl.pathname.replace(/^\/api/, '');
-        const targetUrl = new URL(targetPath, `${process.env.API_URL}`);
+        const targetUrl = new URL(targetPath, `${process.env.INTERNAL_API_URL}`);
 
         targetUrl.search = request.nextUrl.search;
 

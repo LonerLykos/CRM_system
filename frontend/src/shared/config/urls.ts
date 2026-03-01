@@ -1,4 +1,6 @@
-export const baseUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/api`
+export const api_url = `${process.env.INTERNAL_API_URL}`
+export const public_api_url = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/api`
+
 
 export const urls = {
     auth: {

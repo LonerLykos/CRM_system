@@ -1,11 +1,13 @@
-#services:
-#  frontend:
-#    build:
-#      dockerfile: ./frontend/Dockerfile
-#    volumes:
-#      - ./frontend:/app
-#      - /app/node_modules
-#    ports:
-#      - "${FRONTEND_PORT}:3000"
-#    environment:
-#      - NODE_ENV=development
+services:
+  frontend:
+    build:
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
