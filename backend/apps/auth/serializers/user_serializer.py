@@ -6,4 +6,4 @@ User = get_user_model()
 class AuthUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("name", "surname", "is_staff")
+        fields = ("name", "surname", "is_staff", "avatar_hash")

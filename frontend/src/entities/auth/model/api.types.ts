@@ -4,5 +4,12 @@ export interface ILoginRequest {
 }
 
 export interface ILoginResponse {
-    message: string,
+    message: string;
+}
+
+export interface ICurrentUser {
+    name: string;
+    surname: string;
+    is_staff: boolean | string;
+    avatar_hash?: string;
 }
