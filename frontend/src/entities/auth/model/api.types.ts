@@ -5,6 +5,8 @@ export interface ILoginRequest {
 
 export interface ILoginResponse {
     message: string;
+    access_token: string;
+    refresh_token: string;
 }
 
 export interface ICurrentUser {

@@ -1,4 +1,4 @@
-export const UserAvatar = ({ hash }: { hash: string }) => {
+export const UserAvatar = ({ hash }: { hash: string}) => {
   const color = `#${hash.substring(0, 6)}`;
   const grid = [];
 

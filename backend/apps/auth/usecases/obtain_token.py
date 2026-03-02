@@ -8,6 +8,10 @@ class ObtainTokenUseCase:
     def execute(self, response, access_token: str, refresh_token: str):
         self.cookie_service.set_auth_cookies(response, access_token, refresh_token)
 
-        response.data = {"message": "Successful"}
+        response.data = {
+            "message": "Successful",
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        }
         response.status_code = 200
         return response

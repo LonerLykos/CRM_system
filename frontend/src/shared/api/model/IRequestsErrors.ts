@@ -1,4 +1,5 @@
 export interface IRequestsErrors {
     status: number;
-    statusText: string;
+    statusText?: string;
+    detail?: string;
 }

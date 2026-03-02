@@ -1,5 +1,8 @@
 import { LoginPage } from "@/pages/login";
 
-export default function Page() {
-    return <LoginPage />;
+export default async function Page({searchParams}: {searchParams: Promise<{error?: string}>}) {
+
+    const {error} = await searchParams
+
+    return <LoginPage error={error}/>;
 }

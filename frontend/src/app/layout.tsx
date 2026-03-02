@@ -1,6 +1,7 @@
-import Menu from "@/widgets/menu/Menu";
+
 import {Metadata} from "next";
 import './globals.css'
+import {Menu} from "@/widgets/menu/Menu";
 
 export const metadata: Metadata = {
     title: "CRM",
