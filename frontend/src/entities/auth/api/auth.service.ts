@@ -1,11 +1,15 @@
 import {urls} from "@/shared/config/urls";
-import {getData, postData} from "@/shared/api/base/api.services";
-import {ICurrentUser, ILoginRequest, ILoginResponse} from "@/entities/auth/model/api.types";
+import {api} from "@/shared/api/base/api.services";
+import {ICurrentUser, ILoginRequest} from "@/entities/auth/model/api.types";
+import {ITokenPair} from "@/shared/api/model/ITokenPair";
 
 
 export const authService = {
-    login: (data: ILoginRequest) => postData<ILoginResponse, ILoginRequest>(`${urls.auth.login}`, data),
-    getMe: () => getData<ICurrentUser>(urls.auth.currentUser)
+    login: (data: ILoginRequest) => api.post<ITokenPair, ILoginRequest>(
+        `${urls.auth.login}`,
+        data
+    ),
+    getMe: () => api.get<ICurrentUser>(urls.auth.currentUser)
 };
 
 

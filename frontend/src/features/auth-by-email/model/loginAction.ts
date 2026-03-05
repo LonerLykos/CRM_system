@@ -4,7 +4,8 @@ import {redirect} from 'next/navigation'
 import {loginSchema} from './loginSchema'
 import {authService} from '@/entities/auth'
 import {revalidatePath} from "next/cache";
-import {cookies} from "next/headers";
+import {setCookies} from "@/shared/libs/cookies/set-cookies";
+
 
 export async function loginAction(formData: FormData) {
     const rawData = Object.fromEntries(formData.entries())
@@ -18,16 +19,7 @@ export async function loginAction(formData: FormData) {
     const response = await authService.login(validatedFields.data)
 
     if (response && 'access_token' in response && 'refresh_token' in response) {
-        const cookiesStore = await cookies()
-        const cookiesOptions = {
-            httponly: true,
-            secure: false,
-            samesite: 'Lax',
-            path: '/',
-        }
-
-        cookiesStore.set('access_token', response.access_token, cookiesOptions)
-        cookiesStore.set('refresh_token', response.refresh_token, cookiesOptions)
+        await setCookies(response)
     }
 
     if (response && 'detail' in response) {

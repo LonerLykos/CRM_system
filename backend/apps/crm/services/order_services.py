@@ -1,6 +1,5 @@
 from apps.crm.models.orders_model import OrdersModel
 from django.db import transaction
-
 from apps.crm.selectors.order_selectors import OrderSelector
 from core.exceptions.orders_exceptions import OrderNotFound, OrderPermissionDenied
 

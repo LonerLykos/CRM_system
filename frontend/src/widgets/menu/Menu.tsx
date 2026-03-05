@@ -12,6 +12,7 @@ export const Menu = async () => {
     const isCookies = cookiesStore.has('access_token')
 
     const user = isCookies ? await authService.getMe() : ''
+    console.log(user)
 
     return (
         <div className={styles.mainMenu}>

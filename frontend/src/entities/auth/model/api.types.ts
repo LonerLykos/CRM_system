@@ -3,15 +3,9 @@ export interface ILoginRequest {
     password: string;
 }
 
-export interface ILoginResponse {
-    message: string;
-    access_token: string;
-    refresh_token: string;
-}
-
 export interface ICurrentUser {
     name: string;
     surname: string;
-    is_staff: boolean | string;
+    is_staff: boolean;
     avatar_hash: string;
 }

@@ -1,4 +1,5 @@
-import {zod} from "@/shared/libs/zod";
+import {zod} from "@/shared/libs/zod/zod";
+
 
 export const loginSchema = zod.object({
   email: zod.email('Некоректний формат email'),
