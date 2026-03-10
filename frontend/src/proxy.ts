@@ -9,15 +9,6 @@ export default async function proxy(request: NextRequest) {
 
     const {pathname} = request.nextUrl
 
-    // if (pathname.startsWith('/api')) {
-    //     const targetPath = pathname.replace(/^\/api/, '');
-    //     const targetUrl = new URL(targetPath, `${process.env.INTERNAL_API_URL}`);
-    //
-    //     targetUrl.search = request.nextUrl.search;
-    //
-    //     return NextResponse.rewrite(targetUrl);
-    // }
-
     if (pathname.startsWith('/auth')) {
         return NextResponse.next();
     }
@@ -27,7 +18,7 @@ export default async function proxy(request: NextRequest) {
     if (token) {
         try {
             const payload = decodeJwt(token);
-            if (payload.exp && Date.now() >= payload.exp * 1000) {
+            if (payload.exp && Date.now() >= payload.exp * 1000 - 300000) {  // minus 300k for 5 minutes earlier
                 const refreshToken = request.cookies.get('refresh_token')?.value
 
                 if (refreshToken) {
@@ -41,6 +32,10 @@ export default async function proxy(request: NextRequest) {
 
                         return response
                     }
+                    const response = NextResponse.redirect(new URL('/auth', request.url))
+                    response.cookies.delete('access_token')
+                    response.cookies.delete('refresh_token')
+                    return response
                 }
                 const response = NextResponse.redirect(new URL('/auth', request.url))
                 response.cookies.delete('access_token')

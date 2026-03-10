@@ -1,9 +1,12 @@
-import {loginAction} from '../model/loginAction'
+'use server'
 
-export const LoginForm = ({error}: { error?: string }) => {
+import {loginAction} from '../model/loginAction'
+import Form from "next/form";
+
+export const LoginForm = async ({error}: { error?: string }) => {
     return (
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-            <form action={loginAction} style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+            <Form action={loginAction} style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <div>
                     <input name="email" type="email" placeholder="Email" required/>
                 </div>
@@ -13,7 +16,7 @@ export const LoginForm = ({error}: { error?: string }) => {
                 </div>
 
                 <button type="submit">Увійти</button>
-            </form>
+            </Form>
             {error && (
                 <p style={{color: 'red', fontWeight: 'bold'}}>{error}</p>
             )}

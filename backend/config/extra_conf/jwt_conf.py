@@ -22,7 +22,7 @@ SIMPLE_JWT = {
     "SIGNING_KEY": SIGNING_KEY,
     "VERIFYING_KEY": VERIFYING_KEY,
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(hours=12),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=8),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,

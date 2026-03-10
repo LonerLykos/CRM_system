@@ -1,5 +1,5 @@
 export const api_url = `${process.env.INTERNAL_API_URL}`
-export const public_api_url = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/api`
+export const public_api_url = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/api`  //for CSR maybe in future
 
 
 export const urls = {
@@ -36,5 +36,8 @@ export const urls = {
             return `${this.byId(id)}/update`
         },
     },
+    admin: {
+        users: '/users',
+    }
 
 };

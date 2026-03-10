@@ -1,6 +1,6 @@
 import {urls} from "@/shared/config/urls";
 import {api} from "@/shared/api/base/api.services";
-import {ICurrentUser, ILoginRequest} from "@/entities/auth/model/api.types";
+import {ICurrentUser, ILoginRequest, ILogoutResponse} from "@/entities/auth/model/api.types";
 import {ITokenPair} from "@/shared/api/model/ITokenPair";
 
 
@@ -9,7 +9,12 @@ export const authService = {
         `${urls.auth.login}`,
         data
     ),
-    getMe: () => api.get<ICurrentUser>(urls.auth.currentUser)
+    getMe: () => api.get<ICurrentUser>(
+        urls.auth.currentUser
+    ),
+    logout: () => api.post<ILogoutResponse>(
+        urls.auth.logout,
+    ),
 };
 
 

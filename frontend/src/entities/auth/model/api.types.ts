@@ -9,3 +9,8 @@ export interface ICurrentUser {
     is_staff: boolean;
     avatar_hash: string;
 }
+
+export interface ILogoutResponse {
+    status: number;
+    message: string
+}

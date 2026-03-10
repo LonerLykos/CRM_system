@@ -1,6 +1,7 @@
 import {IRequestsErrors} from "@/shared/api/model/IRequestsErrors";
-import {refresh} from "@/shared/api/base/refresh";
+import {refresh} from "@/shared/api/auth-refresh/refresh";
 import {getAuthHeaders} from "@/shared/libs/api/get-auth-headers";
+
 
 
 interface RequestOptions<B> {
@@ -11,8 +12,7 @@ interface RequestOptions<B> {
 
 export async function request<R, B = undefined>(
     endpoint: string,
-    options: RequestOptions<B> = {},
-    isRetry = false
+    options: RequestOptions<B> = {}
 ): Promise<R | IRequestsErrors> {
     const {baseUrl, baseHeaders: authHeaders} = await getAuthHeaders()
 
@@ -28,14 +28,6 @@ export async function request<R, B = undefined>(
             headers,
             ...(options.body && {body: JSON.stringify(options.body)}),
         });
-
-        if (response.status === 401 && !isRetry) {
-            const refreshSuccess = await refresh()
-
-            if (refreshSuccess) {
-                return request<R, B>(endpoint, options, true)
-            }
-        }
 
         if (!response.ok) {
             const {status, statusText} = response;

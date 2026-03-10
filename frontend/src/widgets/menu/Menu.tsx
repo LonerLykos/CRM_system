@@ -1,27 +1,43 @@
 'use server'
 
-import {cookies} from "next/headers";
 import Link from "next/link";
 import styles from "./Menu.module.sass"
-import {authService} from "@/entities/auth";
-import {UserAvatar} from "@/shared/ui/UserAvatar/UserAvatar";
+import {AdminLink, authService, UserAvatar} from "@/entities/auth";
+import {LogoutButton} from "@/features/logout/ui/LogoutButton";
+import Image from "next/image";
+
 
 export const Menu = async () => {
 
-    const cookiesStore = await cookies()
-    const isCookies = cookiesStore.has('access_token')
-
-    const user = isCookies ? await authService.getMe() : ''
-    console.log(user)
+    const user = await authService.getMe()
+    const isLogin = 'name' in user
 
     return (
         <div className={styles.mainMenu}>
             <nav className={styles.navigate}>
-                <Link href="/auth">Login</Link>
-                <Link href="/">Home</Link>
-                {
-                    user && 'avatar_hash' in user ? <UserAvatar hash={user.avatar_hash as string}/> : <></>
-                }
+                <div>
+                    {/*    <Image src={'/icons/BB.png'} alt={'Logo'} width={48} height={48}/>*/}
+                    {
+                        isLogin ? <UserAvatar hash={user.avatar_hash as string}/> : <></>
+                    }
+                </div>
+                <div className={styles.navigateBox}>
+                    {
+                        isLogin ?
+                            <Link href="/">
+                                <Image src={'/icons/Work.png'} alt={'Work'} width={30} height={30}/>
+                            </Link>
+                            :
+                            <></>
+                    }
+                    {
+                        isLogin && user.is_staff ? <AdminLink/> : <></>
+                    }
+                    {
+                        isLogin ? <LogoutButton/> : <></>
+                    }
+                </div>
+
             </nav>
         </div>
     );
