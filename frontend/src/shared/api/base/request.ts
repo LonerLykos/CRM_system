@@ -1,19 +1,19 @@
 import {IRequestsErrors} from "@/shared/api/model/IRequestsErrors";
-import {refresh} from "@/shared/api/auth-refresh/refresh";
 import {getAuthHeaders} from "@/shared/libs/api/get-auth-headers";
-
+import {QueryParams, WrappedResponse} from "@/shared/api";
 
 
 interface RequestOptions<B> {
     method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
     body?: B;
     headers?: Record<string, string>;
+    params?: QueryParams;
 }
 
 export async function request<R, B = undefined>(
     endpoint: string,
     options: RequestOptions<B> = {}
-): Promise<R | IRequestsErrors> {
+): Promise<WrappedResponse<R>> {
     const {baseUrl, baseHeaders: authHeaders} = await getAuthHeaders()
 
     const headers: Record<string, string> = {
@@ -21,8 +21,30 @@ export async function request<R, B = undefined>(
         ...options.headers,
     }
 
+    let fullUrl = `${baseUrl}${endpoint}`;
+
+    if (options.params) {
+        const queryParams = new URLSearchParams();
+
+        Object.entries(options.params).forEach(([key, value]) => {
+            if (value === undefined) {
+                return
+            }
+
+            if (value === null) {
+                queryParams.append(key, "");
+                return;
+            }
+
+            queryParams.append(key, String(value));
+        });
+
+        const queryString = queryParams.toString();
+        if (queryString) fullUrl += `?${queryString}`;
+    }
+
     try {
-        const response = await fetch(`${baseUrl}${endpoint}`, {
+        const response = await fetch(`${fullUrl}`, {
             method: options.method || 'GET',
             cache: "no-store",
             headers,
@@ -30,19 +52,41 @@ export async function request<R, B = undefined>(
         });
 
         if (!response.ok) {
-            const {status, statusText} = response;
             const errorDetail = await response.json().catch(() => ({}));
-            return {status, statusText, ...errorDetail} as IRequestsErrors;
+            return {
+                ok: false,
+                status: response.status,
+                result: null,
+                error: {statusText: response.statusText, ...errorDetail},
+            } as WrappedResponse<R>;
         }
 
-        // ПІД ПИТАННЯМ
         if (response.status === 204) {
-            return {} as R;
+            return {
+                ok: true,
+                status: response.status,
+                result: {} as R,
+                error: null,
+            } as WrappedResponse<R>;
         }
 
-        return await response.json();
+        const data = await response.json()
+        return {
+            ok: true,
+            status: response.status,
+            result: data as R,
+            error: null,
+        } as WrappedResponse<R>;
+
     } catch (error) {
-        console.error(`Error (${options.method} ${endpoint}):`, error);
-        return {status: 500, statusText: 'Network Error'} as IRequestsErrors;
+        return {
+            ok: false,
+            status: 500,
+            result: null,
+            error: {
+                statusText: 'Network Error',
+                detail: String(error),
+            } as IRequestsErrors,
+        } as WrappedResponse<R>;
     }
 }

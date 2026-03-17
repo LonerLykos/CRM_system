@@ -16,18 +16,20 @@ export async function loginAction(formData: FormData) {
         redirect(`/auth?error=${encodeURIComponent(errorMsg)}`)
     }
 
-    const response = await authService.login(validatedFields.data)
+    const {ok, status, result, error} = await authService.login(validatedFields.data)
 
-    if (response && 'access_token' in response && 'refresh_token' in response) {
-        await setCookies(response)
+    if (ok) {
+        await setCookies(result)
     }
 
-    if (response && 'detail' in response) {
-        redirect(`/auth?error=${encodeURIComponent(response.detail as string)}`)
-    } else if (response && 'statusText' in response) {
-        redirect(`/auth?error=${encodeURIComponent(response.statusText as string)}`)
-    } else if (!response) {
-        redirect(`/auth?error=${encodeURIComponent('Сервер не відповідає')}`)
+    if (!ok) {
+        if (status === 500) {
+            redirect(`/auth?error=${encodeURIComponent('Сервер не відповідає')}`)
+        } else if ('detail' in error) {
+            redirect(`/auth?error=${encodeURIComponent(error.detail as string)}`)
+        } else if ('statusText' in error) {
+            redirect(`/auth?error=${encodeURIComponent(error.statusText as string)}`)
+        }
     }
 
     revalidatePath('/', 'layout')

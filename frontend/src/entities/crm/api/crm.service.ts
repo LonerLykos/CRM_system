@@ -1,14 +1,11 @@
-import {getData} from "@/shared/api/base/api.services";
-import {urls} from "@/shared/config/urls";
+import {urls} from "@/shared/config";
+import {api} from "@/shared/api";
 
-
-export interface IUpdateCatSalary {
-    salary: number;
-}
 
 export const crmService = {
-    getAllOrders: (page: number) => getData<any>(`${urls.crm.orders}?page=${page}`),
-
-};
+    getChoices: () => api.get(urls.crm.choices),
+    getGroups: () => api.get(urls.crm.groups),
+    crateGroup: () => api.post(urls.crm.createGroup)
+}
 
 

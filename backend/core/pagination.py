@@ -9,7 +9,7 @@ class PagePagination(PageNumberPagination):
 
     def get_paginated_response(self, data):
         return Response({
-            'total-items': self.page.paginator.count,
+            'total_items': self.page.paginator.count,
             'total_pages': self.page.paginator.num_pages,
             'prev': bool(self.get_previous_link()),
             'next': bool(self.get_next_link()),

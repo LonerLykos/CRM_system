@@ -1,0 +1,1 @@
+export type {ICommentResponse} from './model/api.types';

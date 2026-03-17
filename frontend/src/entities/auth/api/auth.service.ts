@@ -1,7 +1,6 @@
-import {urls} from "@/shared/config/urls";
-import {api} from "@/shared/api/base/api.services";
-import {ICurrentUser, ILoginRequest, ILogoutResponse} from "@/entities/auth/model/api.types";
-import {ITokenPair} from "@/shared/api/model/ITokenPair";
+import {ICurrentUser, ILoginRequest, ILogoutResponse} from "@/entities/auth";
+import {api, ITokenPair} from "@/shared/api";
+import {urls} from "@/shared/config";
 
 
 export const authService = {

@@ -1,8 +1,9 @@
 import {NextResponse} from 'next/server'
 import type {NextRequest} from 'next/server'
 import {decodeJwt} from "jose";
-import {refreshSession} from "@/shared/api/middleware/refresh-session";
-import {COOKIE_OPTIONS} from "@/shared/config/cookiesOptions";
+import {refreshSession} from "@/shared/api";
+import {COOKIE_OPTIONS} from "@/shared/config";
+
 
 
 export default async function proxy(request: NextRequest) {

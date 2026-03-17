@@ -5,5 +5,5 @@ from apps.crm.models.group_model import GroupModel
 class GroupsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupModel
-        fields = ("name",)
+        fields = ("id", "name",)
         read_only_fields = ("id",)

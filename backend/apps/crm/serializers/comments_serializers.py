@@ -3,12 +3,14 @@ from apps.crm.models.comments_model import CommentsModel
 
 
 class CommentsSerializer(serializers.ModelSerializer):
-    user_name = serializers.CharField(source="user.name", read_only=True)
+    name = serializers.CharField(source="user.name", read_only=True)
+    surname = serializers.CharField(source="user.surname", read_only=True)
     class Meta:
         model = CommentsModel
         fields = (
             "comment",
-            "user_name",
+            "name",
+            "surname",
             "created_at",
         )
 

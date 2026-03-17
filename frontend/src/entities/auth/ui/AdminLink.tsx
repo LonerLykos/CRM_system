@@ -1,8 +1,8 @@
 'use server'
 
 import Link from "next/link";
-import {urls} from "@/shared/config/urls";
 import Image from "next/image";
+import {urls} from "@/shared/config";
 
 
 export const AdminLink = async () => {
