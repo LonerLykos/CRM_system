@@ -33,5 +33,5 @@ export async function loginAction(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
-    redirect('/')
+    redirect('/crm')
 }

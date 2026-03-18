@@ -15,7 +15,7 @@ export const OrdersPage = async ({page}: Props) => {
     if (!ok) {return <></>}
 
     return (
-        <div className="page-wrapper">
+        <div>
 
             <OrderTable orders={result.data} />
 

@@ -22,7 +22,7 @@ export const Menu = async () => {
                     <UserAvatar hash={result.avatar_hash as string}/>
                 </div>
                 <div className={styles.navigateBox}>
-                    <Link href="/">
+                    <Link href="/crm">
                         <Image src={'/icons/Work.png'} alt={'Work'} width={30} height={30}/>
                     </Link>
                     {

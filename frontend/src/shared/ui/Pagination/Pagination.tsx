@@ -1,6 +1,9 @@
+'use server'
+
 import Link from 'next/link';
 import styles from './Pagination.module.sass';
 import {IPaginatedResponse} from "@/shared/api";
+import {getDynamicSlots} from "@/shared/libs";
 
 interface PaginationProps {
     currentPage: number;
@@ -8,32 +11,38 @@ interface PaginationProps {
     paginationInfo: Omit<IPaginatedResponse<unknown>, 'data'>
 }
 
-export const Pagination = ({ currentPage, baseUrl, paginationInfo }: PaginationProps) => {
-    const {next, prev, total_pages} = paginationInfo
-    const prevPage = prev ? currentPage - 1 : null;
-    const nextPage = next ? currentPage + 1 : null;
+export const Pagination = async ({ currentPage, baseUrl, paginationInfo }: PaginationProps) => {
+    const { total_pages, next, prev } = paginationInfo;
+    const max_slots = 9;
+
+    const slots = getDynamicSlots(total_pages, currentPage, max_slots);
 
     return (
         <nav className={styles.pagination}>
-            {prevPage ? (
-                <Link href={`${baseUrl}?page=${prevPage}`} className={styles.btn}>
-                    &larr; Назад
-                </Link>
-            ) : (
-                <span className={`${styles.btn} ${styles.disabled}`}>&larr; Назад</span>
-            )}
-
-            <div className={styles.info}>
-                Сторінка <strong>{currentPage}</strong> з {total_pages}
+            <div className={`${styles.navSlot} ${!prev ? styles.invisible : ''}`}>
+                <Link href={`${baseUrl}?page=${currentPage - 1}`} className={styles.navBtn}>&lt;</Link>
             </div>
 
-            {nextPage ? (
-                <Link href={`${baseUrl}?page=${nextPage}`} className={styles.btn}>
-                    Вперед &rarr;
-                </Link>
-            ) : (
-                <span className={`${styles.btn} ${styles.disabled}`}>Вперед &rarr;</span>
-            )}
+            <div className={styles.pagesGrid}>
+                {slots.map((page, index) => (
+                    <div key={index} className={styles.slot}>
+                        {page === '...' ? (
+                            <span className={styles.dots}>...</span>
+                        ) : (
+                            <Link
+                                href={`${baseUrl}?page=${page}`}
+                                className={`${styles.btn} ${page === currentPage ? styles.active : ''}`}
+                            >
+                                {page}
+                            </Link>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            <div className={`${styles.navSlot} ${!next ? styles.invisible : ''}`}>
+                <Link href={`${baseUrl}?page=${currentPage + 1}`} className={styles.navBtn}>&gt;</Link>
+            </div>
         </nav>
     );
 };

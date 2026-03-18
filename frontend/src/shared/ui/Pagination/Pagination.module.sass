@@ -1,22 +1,55 @@
 .pagination
   display: flex
   align-items: center
+  justify-content: center
   gap: 15px
-  margin-top: 20px
+  margin: 40px 0
+  min-height: 50px
 
-.btn
-  padding: 8px 16px
-  border: 1px solid #ccc
+.pagesGrid
+  display: grid
+  grid-auto-flow: column
+  grid-auto-columns: 44px 
+  gap: 6px
+  justify-content: center
+
+.slot
+  width: 44px
+  height: 44px
+  display: flex
+  justify-content: center
+  align-items: center
+
+.btn, .dots
+  display: flex
+  align-items: center
+  justify-content: center
+  width: 42px
+  height: 42px
+  border-radius: 50%
+  background-color: #00ff73
+  color: white
+  font-weight: 600
   text-decoration: none
-  color: #333
-  border-radius: 4px
+  transition: 0.2s
 
-.btn:hover:not(.disabled)
-  background-color: #f0f0f0
+.active
+  background-color: #00a651
 
-.disabled
-  color: #ccc
-  cursor: not-allowed
+.navSlot
+  width: 75px
+  display: flex
+  justify-content: center
+  &.invisible
+    visibility: hidden
 
-.info
-  font-size: 14px
+.navBtn
+  width: 70px
+  height: 42px
+  background-color: #00ff73
+  color: white
+  border-radius: 25px
+  display: flex
+  align-items: center
+  justify-content: center
+  text-decoration: none

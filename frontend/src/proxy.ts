@@ -9,12 +9,19 @@ import {COOKIE_OPTIONS} from "@/shared/config";
 export default async function proxy(request: NextRequest) {
 
     const {pathname} = request.nextUrl
+    const token = request.cookies.get('access_token')?.value
 
     if (pathname.startsWith('/auth')) {
         return NextResponse.next();
     }
 
-    const token = request.cookies.get('access_token')?.value
+    if (pathname === '/') {
+        if (token) {
+            return NextResponse.redirect(new URL('/crm', request.url))
+        } else {
+            return NextResponse.redirect(new URL('/auth', request.url))
+        }
+    }
 
     if (token) {
         try {
