@@ -17,9 +17,13 @@ class CommentService:
 
         if order.manager is None:
             order.manager = self.user
-            order.save(update_fields=['manager'])
         elif order.manager != self.user:
             raise OrderPermissionDenied()
+
+        if not order.status or order.status == 'new':
+            order.status = "in_work"
+
+        order.save(update_fields=['manager', 'status'])
 
         comment = CommentsModel.objects.create(
             order=order,

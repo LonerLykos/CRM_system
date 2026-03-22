@@ -8,7 +8,14 @@ class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentsModel
         fields = (
+            "id",
             "comment",
+            "name",
+            "surname",
+            "created_at",
+        )
+        read_only_fields = (
+            "id",
             "name",
             "surname",
             "created_at",

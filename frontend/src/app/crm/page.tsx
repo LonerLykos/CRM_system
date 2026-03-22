@@ -1,8 +1,10 @@
 import {OrdersPage} from "@/pages/OrdersPage";
+import {ISearchParams} from "@/shared/model";
 
 
-export default async function Page({searchParams}: {searchParams: Promise<{page?: string}>}) {
 
-    const {page} = await searchParams
-    return <OrdersPage page={page ? Number(page) : 1}/>;
+export default async function Page({searchParams}: { searchParams: Promise<ISearchParams> }) {
+
+    const params = await searchParams
+    return <OrdersPage params={params}/>;
 }

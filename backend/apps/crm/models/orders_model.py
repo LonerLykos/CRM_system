@@ -6,7 +6,10 @@ from core.models import BaseModel
 
 
 class OrderQuerySet(models.QuerySet):
-    def with_prefetches(self):
+    def for_list(self):
+        return self.select_related('manager', 'group')
+
+    def for_detail(self):
         return self.select_related('manager', 'group').prefetch_related('comments')
 
 

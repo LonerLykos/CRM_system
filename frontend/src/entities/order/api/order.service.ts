@@ -1,13 +1,13 @@
 import {api, IPaginatedResponse, QueryParams} from "@/shared/api";
 import {urls} from "@/shared/config";
-import {IOrderResponse} from "@/entities/order";
+import {IOrderDetailResponse, IOrderResponse} from "@/entities/order";
 
 
 export const orderService = {
-    getAllOrders: <T>(params?: QueryParams) => api.get<IPaginatedResponse<IOrderResponse<T>>>(
+    getAllOrders: (params?: QueryParams) => api.get<IPaginatedResponse<IOrderResponse>>(
         urls.crm.orders, params
     ),
-    getOrderById: <T>(id: string) => api.get<IOrderResponse<T>>(urls.crm.byId(id))
+    getOrderById: <T>(id: string) => api.get<IOrderDetailResponse<T>>(urls.crm.byId(id))
 }
 
 

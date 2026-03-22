@@ -1,4 +1,4 @@
-export interface IOrderResponse<T>{
+export interface IOrderResponse{
     id: number,
     name?: string,
     surname?: string,
@@ -16,7 +16,11 @@ export interface IOrderResponse<T>{
     status?: string,
     group?: string,
     manager?: string,
-    comments?: T[],
+
 }
 
-export type OrderBase = Omit<IOrderResponse<unknown>, 'comments' | 'utm' | 'msg'>
+export type OrderBase = Omit<IOrderResponse, 'utm' | 'msg'>
+
+export interface IOrderDetailResponse<T> extends IOrderResponse {
+    comments: T[] | [],
+}

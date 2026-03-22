@@ -1,0 +1,17 @@
+export const columns = [
+    {key:'id', label: 'ID'},
+    {key:'name', label: 'Name'},
+    {key:'surname', label: 'Surname'},
+    {key:'email', label: 'Email'},
+    {key:'phone', label: 'Phone'},
+    {key:'age', label: 'Age'},
+    {key:'course', label: 'Course'},
+    {key:'course_format', label: 'Course format'},
+    {key:'course_type', label: 'Course type'},
+    {key:'status', label: 'Status'},
+    {key:'sum', label: 'Sum'},
+    {key:'already_paid', label: 'Already paid'},
+    {key:'group', label: 'Group'},
+    {key:'created_at', label: 'Created at'},
+    {key:'manager', label: 'Manager'},
+] as const

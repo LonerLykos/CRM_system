@@ -1,26 +1,65 @@
 'use server'
 
-import {formatDate, OrderBase} from "@/entities/order";
+import {OrderBase} from "@/entities/order";
+import Link from "next/link";
+import {ISearchParams} from "@/shared/model";
+import {formatDate, rebuildParams} from "@/shared/libs";
 
 
-export const OrderRow = async(order: OrderBase) => {
+interface OrderRowProps {
+    params: ISearchParams;
+    order: OrderBase;
+}
+
+export const OrderRow = async({params, order}: OrderRowProps) => {
+    const nextParams = rebuildParams(params, {orderId: `${order.id}`})
     return (
       <tr>
-          <td>{order.id}</td>
-          <td>{order.name}</td>
-          <td>{order.surname}</td>
-          <td>{order.email}</td>
-          <td>{order.phone}</td>
-          <td>{order.age}</td>
-          <td>{order.course}</td>
-          <td>{order.course_format}</td>
-          <td>{order.course_type}</td>
-          <td>{order.status}</td>
-          <td>{order.sum}</td>
-          <td>{order.already_paid}</td>
-          <td>{order.group}</td>
-          <td>{formatDate(order.created_at)}</td>
-          <td>{order.manager}</td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.id}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.name}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.surname}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.email}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.phone}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.age}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.course}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.course_format}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.course_type}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.status}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.sum}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.already_paid}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.group}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{formatDate(order.created_at)}</Link>
+          </td>
+          <td>
+              <Link href={`/crm?${nextParams}`}>{order.manager}</Link>
+          </td>
       </tr>
     );
 } 

@@ -1,6 +1,5 @@
 from django_filters import rest_framework as filters
 from apps.crm.models.orders_model import CoursesChoices, CoursesTypeChoices, CoursesFormatChoices, StatusChoices
-from apps.crm.serializers.orders_serializers import OrdersSerializer
 
 
 class OrderFilter(filters.FilterSet):
@@ -20,7 +19,23 @@ class OrderFilter(filters.FilterSet):
     created_at_gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
     my = filters.BooleanFilter(method='filter_my_orders')
     order = filters.OrderingFilter(
-        fields=OrdersSerializer.Meta.fields
+        fields=(
+            ('id', 'id'),
+            ('name', 'name'),
+            ('surname', 'surname'),
+            ('email', 'email'),
+            ('phone', 'phone'),
+            ('age', 'age'),
+            ('course', 'course'),
+            ('course_format', 'course_format'),
+            ('course_type', 'course_type'),
+            ('sum', 'sum'),
+            ('already_paid', 'already_paid'),
+            ('created_at', 'created_at'),
+            ('status', 'status'),
+            ('group__name', 'group'),
+            ('manager__surname', 'manager'),
+        )
     )
 
     def filter_my_orders(self, queryset, value):

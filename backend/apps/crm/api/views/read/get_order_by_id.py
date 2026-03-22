@@ -1,10 +1,10 @@
 from rest_framework.generics import RetrieveAPIView
 from apps.crm.selectors.order_selectors import OrderSelector
-from apps.crm.serializers.orders_serializers import OrdersSerializer
+from apps.crm.serializers.orders_serializers import OrderDetailSerializer
 
 
 class GetOrderById(RetrieveAPIView):
-    serializer_class = OrdersSerializer
+    serializer_class = OrderDetailSerializer
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
