@@ -10,8 +10,8 @@ class ChoicesProvider:
     @classmethod
     def get_all(cls):
         return {
-            'statuses': cls._choices_to_dict(StatusChoices.choices),
-            'courses': cls._choices_to_dict(CoursesChoices.choices),
-            'types': cls._choices_to_dict(CoursesTypeChoices.choices),
-            'formats': cls._choices_to_dict(CoursesFormatChoices.choices),
+            'course': cls._choices_to_dict(CoursesChoices.choices),
+            'course_type': cls._choices_to_dict(CoursesTypeChoices.choices),
+            'course_format': cls._choices_to_dict(CoursesFormatChoices.choices),
+            'status': cls._choices_to_dict(StatusChoices.choices),
         }

@@ -1,0 +1,17 @@
+export const filterSet = [
+    {key: 'name_contains', value: 'Name'},
+    {key: 'surname_contains', value: 'Surname'},
+    {key: 'email_contains', value: 'Email'},
+    {key: 'phone_contains', value: 'Phone'},
+    {key: 'age_eq', value: 'Age'},
+    {key: 'sum_eq', value: 'Sum'},
+    {key: 'already_paid_eq', value: 'Already paid'},
+    {key: 'course', value: 'Course'},
+    {key: 'course_type', value: 'Course type'},
+    {key: 'course_format', value: 'Course format'},
+    {key: 'status', value: 'Status'},
+    {key: 'group_name_contains', value: 'Group name'},
+    {key: 'created_at_lte', value: 'Created_at_lte'},
+    {key: 'created_at_gte', value: 'Created_at_gte'},
+    {key: 'my', value: 'My'},
+] as const

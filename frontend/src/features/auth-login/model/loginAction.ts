@@ -1,10 +1,12 @@
 'use server'
 
 import {redirect} from 'next/navigation'
-import {loginSchema} from './loginSchema'
-import {authService} from '@/entities/auth'
 import {revalidatePath} from "next/cache";
-import {setCookies} from "@/shared/libs/cookies/set-cookies";
+import {loginSchema} from "@/features/auth-login";
+import {authService} from '@/entities/auth'
+import {setCookies} from "@/shared/libs";
+import {crmService} from "@/entities/crm";
+import {cookies} from "next/headers";
 
 
 export async function loginAction(formData: FormData) {
@@ -20,6 +22,8 @@ export async function loginAction(formData: FormData) {
 
     if (ok) {
         await setCookies(result)
+        revalidatePath('/', 'layout')
+        redirect('/crm')
     }
 
     if (!ok) {

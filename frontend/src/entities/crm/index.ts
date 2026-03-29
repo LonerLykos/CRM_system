@@ -1,2 +1,3 @@
 export {crmService} from './api/crm.service';
-export type {IGroupResponse, IChoicesResponse} from './model/api.types';
+export type * from './model/api.types';
+export {getCachedChoices} from './lib/get-cached-choices';

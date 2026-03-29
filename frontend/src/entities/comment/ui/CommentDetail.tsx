@@ -1,5 +1,6 @@
 import {ICommentResponse} from "@/entities/comment";
 import {formatDate} from "@/shared/libs";
+import s from './CommentDetail.module.sass';
 
 interface CommentProp {
     comment: ICommentResponse
@@ -8,7 +9,7 @@ interface CommentProp {
 export const CommentDetail = async ({comment}: CommentProp) => {
 
     return (
-        <div>
+        <div className={s.commentCard}>
             <p>{comment.comment}</p>
             <p>{comment.name}</p>
             <p>{comment.surname}</p>

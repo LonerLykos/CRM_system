@@ -1,12 +1,12 @@
 'use server'
 
-import {columns, IOrderResponse, IOrderDetailResponse, orderingToggle, OrderRow} from "@/entities/order";
-import s from './OrderTable.module.sass';
+import React from "react";
 import Link from "next/link";
+import {columns, IOrderResponse, IOrderDetailResponse, orderingToggle, OrderRow} from "@/entities/order";
+import {CommentDetail, ICommentResponse} from "@/entities/comment";
 import {ISearchParams} from "@/shared/model";
 import {rebuildParams} from "@/shared/libs";
-import React from "react";
-import {CommentDetail, ICommentResponse} from "@/entities/comment";
+import s from './OrderTable.module.sass';
 
 interface OrderTableProps {
     orders: IOrderResponse[];
@@ -37,7 +37,7 @@ export const OrderTable = async ({
                     <th key={key}>
                         <Link href={getSortHref(key)}>
                             {label}
-                            <span>
+                            <span className={s.arrow}>
                                 {params.order?.includes(key) &&
                                     (params.order.startsWith('-') ? '\u2193' : '\u2191')}
                             </span>
@@ -47,9 +47,9 @@ export const OrderTable = async ({
             </tr>
             </thead>
             <tbody>
-            {orders.map(order => (
+            {orders.map((order, index) => (
                 <React.Fragment key={order.id}>
-                    <OrderRow params={params} order={order}/>
+                    <OrderRow className={index % 2 === 0 ? s.rowEven : s.rowOdd} params={params} order={order}/>
                     {activeOrderId === String(order.id) && (
                         <tr className={s.expandedRow}>
                             <td colSpan={columns.length}>
@@ -61,7 +61,7 @@ export const OrderTable = async ({
 
                                     <div className={s.commentsSection}>
                                         <div className={s.commentsList}>
-                                            {currentOrder && currentOrder.comments.map((comment, index) => (
+                                            {currentOrder && currentOrder.comments.map(comment => (
                                                 <CommentDetail key={comment.id} comment={comment}/>
                                             ))}
                                         </div>

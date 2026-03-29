@@ -9,12 +9,13 @@ import {formatDate, rebuildParams} from "@/shared/libs";
 interface OrderRowProps {
     params: ISearchParams;
     order: OrderBase;
+    className?: string
 }
 
-export const OrderRow = async({params, order}: OrderRowProps) => {
+export const OrderRow = async({params, order, className}: OrderRowProps) => {
     const nextParams = rebuildParams(params, {orderId: `${order.id}`})
     return (
-      <tr>
+      <tr className={className}>
           <td>
               <Link href={`/crm?${nextParams}`}>{order.id}</Link>
           </td>

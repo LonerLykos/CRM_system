@@ -1,67 +1,85 @@
 import {NextResponse} from 'next/server'
 import type {NextRequest} from 'next/server'
-import {decodeJwt} from "jose";
+import {importSPKI, jwtVerify} from "jose";
 import {refreshSession} from "@/shared/api";
-import {COOKIE_OPTIONS} from "@/shared/config";
+import {COOKIE_OPTIONS, DELETE_COOKIE_OPTIONS} from "@/shared/config";
 
+type JoseKey = Awaited<ReturnType<typeof importSPKI>>;
 
+let publicKeyPromise: Promise<JoseKey> | null = null;
+
+const getPublicKey = async (): Promise<JoseKey> => {
+    if (publicKeyPromise) return publicKeyPromise;
+
+    publicKeyPromise = (async () => {
+        const b64 = process.env.JWT_PUBLIC_KEY_B64!;
+        const pem = atob(b64);
+        return await importSPKI(pem, 'RS256');
+    })();
+
+    return publicKeyPromise;
+};
+
+const logout = (request: NextRequest) => {
+    const response = NextResponse.redirect(new URL('/auth', request.url));
+    response.cookies.set('access_token', '', DELETE_COOKIE_OPTIONS);
+    response.cookies.set('refresh_token', '', DELETE_COOKIE_OPTIONS);
+    return response;
+};
 
 export default async function proxy(request: NextRequest) {
-
     const {pathname} = request.nextUrl
-    const token = request.cookies.get('access_token')?.value
+
+    if (pathname.startsWith('/_next') || pathname.includes('.')) {
+        return NextResponse.next()
+    }
 
     if (pathname.startsWith('/auth')) {
         return NextResponse.next();
     }
 
+    const token = request.cookies.get('access_token')?.value
+
     if (pathname === '/') {
-        if (token) {
-            return NextResponse.redirect(new URL('/crm', request.url))
-        } else {
-            return NextResponse.redirect(new URL('/auth', request.url))
-        }
+        return token
+            ? NextResponse.redirect(new URL('/crm', request.url))
+            : NextResponse.redirect(new URL('/auth', request.url))
     }
 
-    if (token) {
-        try {
-            const payload = decodeJwt(token);
-            if (payload.exp && Date.now() >= payload.exp * 1000 - 300000) {  // minus 300k for 5 minutes earlier
-                const refreshToken = request.cookies.get('refresh_token')?.value
+    if (!token) {
+        return logout(request)
+    }
 
-                if (refreshToken) {
-                    const newTokens = await refreshSession(refreshToken)
+    try {
+        const publicKey = await getPublicKey();
+        const {payload} = await jwtVerify(token, publicKey);
 
-                    if (newTokens) {
-                        const response = NextResponse.next()
+        if (payload.exp && Date.now() >= payload.exp * 1000 - 300000) {
+            const refreshToken = request.cookies.get('refresh_token')?.value
 
-                        response.cookies.set('access_token', newTokens.access_token, COOKIE_OPTIONS)
-                        response.cookies.set('refresh_token', newTokens.refresh_token, COOKIE_OPTIONS)
+            if (refreshToken) {
+                const newTokens = await Promise.race([
+                    refreshSession(refreshToken),
+                    new Promise<null>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+                ]).catch(() => null);
 
-                        return response
-                    }
-                    const response = NextResponse.redirect(new URL('/auth', request.url))
-                    response.cookies.delete('access_token')
-                    response.cookies.delete('refresh_token')
+                if (newTokens) {
+                    const response = NextResponse.next()
+                    response.cookies.set('access_token', newTokens.access_token, COOKIE_OPTIONS)
+                    response.cookies.set('refresh_token', newTokens.refresh_token, COOKIE_OPTIONS)
                     return response
                 }
-                const response = NextResponse.redirect(new URL('/auth', request.url))
-                response.cookies.delete('access_token')
-                response.cookies.delete('refresh_token')
-                return response
             }
-        } catch (e) {
-            console.error(e)
+            return logout(request)
         }
         return NextResponse.next()
+    } catch (e) {
+        return logout(request)
     }
-
-    const response = NextResponse.redirect(new URL('/auth', request.url))
-    response.cookies.delete('access_token')
-    response.cookies.delete('refresh_token')
-    return response
 }
 
 export const config = {
-    matcher: ['/((?!_next/static|_next/image|favicon.ico|public|.*\\..*).*)'],
+    matcher: [
+        '/((?!api|_next|static|public|favicon.ico|.*\\..*).*)',
+    ],
 }

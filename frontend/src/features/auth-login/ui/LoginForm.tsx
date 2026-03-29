@@ -1,7 +1,8 @@
 'use server'
 
-import {loginAction} from '../model/loginAction'
 import Form from "next/form";
+import {loginAction} from "@/features/auth-login";
+
 
 export const LoginForm = async ({error}: { error?: string }) => {
     return (

@@ -1,4 +1,4 @@
-import { LoginForm } from '@/features/auth-by-email/ui/LoginForm';
+import { LoginForm } from '@/features/auth-login/ui/LoginForm';
 
 interface LoginPageProps {
     error?: string;

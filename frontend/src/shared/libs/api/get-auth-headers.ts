@@ -13,6 +13,7 @@ export async function getAuthHeaders(): Promise<AuthHeadersResult> {
     const baseHeaders: Record<string, string> = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+
     }
 
     if (isServer) {

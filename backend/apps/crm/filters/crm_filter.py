@@ -13,7 +13,7 @@ class OrderFilter(filters.FilterSet):
     course_format = filters.ChoiceFilter('course_format', choices=CoursesFormatChoices.choices)
     sum_eq = filters.NumberFilter(field_name='sum', lookup_expr='exact')
     already_paid_eq = filters.NumberFilter(field_name='already_paid', lookup_expr='exact')
-    status = filters.ChoiceFilter('day', choices=StatusChoices.choices)
+    status = filters.ChoiceFilter('status', choices=StatusChoices.choices)
     group_name_contains = filters.CharFilter(field_name='group__name', lookup_expr='icontains')
     created_at_lte = filters.DateTimeFilter(field_name='created_at', lookup_expr='lte')
     created_at_gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
@@ -38,7 +38,7 @@ class OrderFilter(filters.FilterSet):
         )
     )
 
-    def filter_my_orders(self, queryset, value):
+    def filter_my_orders(self, queryset, name, value):
         if value and self.request.user.is_authenticated:
             return queryset.filter(manager=self.request.user)
         return queryset

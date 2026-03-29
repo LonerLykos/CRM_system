@@ -1,18 +1,10 @@
 import {IRequestsErrors} from "@/shared/api/model/IRequestsErrors";
 import {getAuthHeaders} from "@/shared/libs/api/get-auth-headers";
-import {QueryParams, WrappedResponse} from "@/shared/api";
-
-
-interface RequestOptions<B> {
-    method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
-    body?: B;
-    headers?: Record<string, string>;
-    params?: QueryParams;
-}
+import {IRequestOptions, WrappedResponse} from "@/shared/api";
 
 export async function request<R, B = undefined>(
     endpoint: string,
-    options: RequestOptions<B> = {}
+    options: IRequestOptions<B> = {}
 ): Promise<WrappedResponse<R>> {
     const {baseUrl, baseHeaders: authHeaders} = await getAuthHeaders()
 

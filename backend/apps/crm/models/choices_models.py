@@ -11,7 +11,7 @@ class StatusChoices(models.TextChoices):
 
 class CoursesChoices(models.TextChoices):
     FS = 'FS', 'Fullstack'
-    QACX = 'QAСX', 'QA Complex'
+    QACX = 'QACX', 'QA Complex'
     JCX = 'JCX', 'Java Complex'
     JSCX = 'JSCX', 'JavaScript Complex'
     FE = 'FE', 'Frontend'

@@ -5,57 +5,92 @@
 
   th, td
     font-size: 0.9rem
-    padding: 3px
     border: 1px solid #ddd
     overflow: hidden
     text-overflow: ellipsis
     white-space: nowrap
-
-
-  td
     height: 20px
 
+  a
+    display: block
+    padding: 3px
+    width: 100%
+    height: 100%
+    text-decoration: none
+    color: inherit
+    cursor: pointer
+    outline: none
+
+    &:visited
+      color: inherit
+
+  .arrow
+    margin-left: 2px
+
+  th
+    background-color: #00a651
+
   th:nth-child(1) // ID
-    width: 40px
+       width: 40px
 
   th:nth-child(2) // Name
-    width: 80px
+       width: 80px
 
   th:nth-child(3) // Surname
-    width: 100px
+       width: 100px
 
   th:nth-child(4) // Email
-    width: 170px
+       width: 170px
 
   th:nth-child(5) // Phone
-    width: 80px
+       width: 80px
 
   th:nth-child(6) // Age
-    width: 30px
+       width: 30px
 
   th:nth-child(7) // Course
-    width: 50px
+       width: 50px
 
   th:nth-child(8) // Course format
-    width: 80px
+       width: 80px
 
   th:nth-child(9) // Course type
-    width: 70px
+       width: 70px
 
   th:nth-child(10) // Status
-    width: 60px
+       width: 60px
 
   th:nth-child(11) // Sum
-    width: 60px
+       width: 60px
 
   th:nth-child(12) // Already paid
-    width: 80px
+       width: 80px
 
   th:nth-child(13) // Group
-    width: 80px
+       width: 80px
 
   th:nth-child(14) // Created at
-    width: 80px
+       width: 80px
 
   th:nth-child(15) // Manager
-    width: 100px
+       width: 100px
+
+  tbody
+    .rowEven
+      background-color: #f1f1f1
+
+    .rowOdd
+      background-color: #cecece
+
+    .expandedRow
+      background-color: #ffeedc
+
+    .detailsWrapper
+      display: flex
+      justify-content: space-between
+
+      .metaInfo
+        width: 30%
+
+      .commentsSection
+        width: 60%

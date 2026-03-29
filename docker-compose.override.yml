@@ -11,3 +11,7 @@ services:
       - .env
     environment:
       - NODE_ENV=development
+    deploy:
+      resources:
+        limits:
+          memory: 2G

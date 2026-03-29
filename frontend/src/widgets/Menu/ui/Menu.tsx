@@ -3,7 +3,7 @@
 import Link from "next/link";
 import styles from "./Menu.module.sass"
 import {AdminLink, authService, UserAvatar} from "@/entities/auth";
-import {LogoutButton} from "@/features/logout/ui/LogoutButton";
+import {LogoutButton} from "@/features/auth-logout";
 import Image from "next/image";
 
 
