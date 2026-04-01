@@ -1,8 +1,8 @@
 from django.urls import path
-from .views.auth_user import AuthUserView
-from .views.logout_view import LogoutView
-from .views.token_obtain_view import CookieTokenObtainPairView
-from .views.token_refresh_view import CookieTokenRefreshView
+from .views.read.auth_user import AuthUserView
+from .views.write.logout_view import LogoutView
+from .views.write.token_obtain_view import CookieTokenObtainPairView
+from .views.write.token_refresh_view import CookieTokenRefreshView
 
 urlpatterns = [
     path('', CookieTokenObtainPairView.as_view(), name='auth_login'),

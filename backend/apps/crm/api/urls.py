@@ -1,9 +1,9 @@
 from django.urls import path
-from apps.crm.api.views.read.get_all_groups import GroupsListView
-from apps.crm.api.views.read.get_all_orders import OrdersListView
-from apps.crm.api.views.read.get_choices import ChoicesView
-from apps.crm.api.views.read.get_order_by_id import OrderDetails
-from apps.crm.api.views.write.add_group import AddGroupView
+from apps.crm.api.views.read.groups_list import GroupsListView
+from apps.crm.api.views.read.orders_list import OrdersListView
+from apps.crm.api.views.read.choices_list import ChoicesView
+from apps.crm.api.views.read.order_details import OrderDetails
+from apps.crm.api.views.write.create_group import AddGroupView
 from apps.crm.api.views.write.create_comment_view import CreateCommentView
 from apps.crm.api.views.write.update_order import OrderUpdateView
 
