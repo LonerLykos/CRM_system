@@ -1,7 +1,7 @@
 from django.db import models
 from apps.crm.models.choices_models import CoursesChoices, CoursesFormatChoices, CoursesTypeChoices, StatusChoices
 from apps.crm.models.group_model import GroupModel
-from apps.users.models import UserModel
+from apps.users.models.models import UserModel
 from core.models import BaseModel
 
 

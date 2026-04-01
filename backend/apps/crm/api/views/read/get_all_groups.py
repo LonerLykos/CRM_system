@@ -8,4 +8,4 @@ class GroupsListView(ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return GroupsSelector().list()
+        return GroupsSelector().get_queryset()

@@ -9,4 +9,4 @@ class OrdersListView(ListAPIView):
     filterset_class = OrderFilter
 
     def get_queryset(self):
-        return OrderSelector().list()
+        return OrderSelector().get_queryset()

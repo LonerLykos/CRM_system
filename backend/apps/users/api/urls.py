@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import UserListView, UserActivateView, SetPasswordView, ToggleBanUserView
+from apps.users.api.views.views import UserListView, UserActivateView, SetPasswordView, ToggleBanUserView
 
 urlpatterns = [
     path('', UserListView.as_view(), name='users_list'),

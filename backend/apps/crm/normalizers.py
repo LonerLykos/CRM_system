@@ -12,13 +12,7 @@ def normalize_order_choices(data):
     for field, mode in CHOICE_FIELDS.items():
         value = result.get(field)
 
-        if 'alreadyPaid' in result:
-            result['already_paid'] = result.pop('alreadyPaid')
-
-        if not value:
-            continue
-
-        if not isinstance(value, str):
+        if not value or isinstance(value, str):
             continue
 
         if mode == "upper":

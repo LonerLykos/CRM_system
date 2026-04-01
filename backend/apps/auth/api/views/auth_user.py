@@ -8,4 +8,4 @@ class AuthUserView(RetrieveAPIView):
     selector = UserSelector()
 
     def get_object(self):
-        return self.selector.get_user_by_id(self.kwargs['pk'])
+        return self.selector.get_by_id(self.kwargs['pk'])

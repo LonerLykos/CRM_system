@@ -3,22 +3,28 @@
 import os
 import json
 from django.db import migrations
-from apps.crm.logic import normalize_order_choices
+from apps.crm.normalizers import normalize_order_choices
 
 
 def load_initial_orders_data(apps, schema_editor):
-    Order = apps.get_model('crm', 'OrdersModel')
+    order_model = apps.get_model('crm', 'OrdersModel')
     file_path = os.path.join(
         os.path.dirname(__file__), '..', '..', '..', 'extra_data', 'base_data_for_db', 'orders.json'
     )
-    with open(file_path) as f:
+
+    if not os.path.exists(file_path):
+        return
+
+    with open(file_path, 'r', encoding='utf-8') as f:
         orders = json.load(f)
 
     for order in orders:
+        if 'alreadyPaid' in order:
+            order['already_paid'] = order.pop('alreadyPaid')
 
         normalized_data = normalize_order_choices(order)
 
-        Order.objects.create(**normalized_data)
+        order_model.objects.create(**normalized_data)
 
 
 def unload_initial_orders_data(apps, schema_editor):
