@@ -14,7 +14,7 @@ interface OrderParamsProps {
 
 export const OrdersPage = async ({params}: OrderParamsProps) => {
 
-    const {page = '1', orderId, ...filters} = params
+    const {page = '1', orderId} = params
 
     const {ok: listOk, result: listData} = await orderService.getAllOrders({...params});
 

@@ -1,40 +1,36 @@
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.views import TokenRefreshView
+from apps.auth.services.auth_service import AuthService
 import structlog
-from apps.auth.services.cookie_service import CookieService
-from apps.auth.usecases.refresh_token import RefreshTokenUseCase
-from apps.auth.repositories.token_repository import TokenRepository
 
 log = structlog.get_logger()
 
 
 class CookieTokenRefreshView(TokenRefreshView):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.usecase = RefreshTokenUseCase(
-            cookie_service=CookieService(),
-            token_repository=TokenRepository()
-        )
-
     def post(self, request, *args, **kwargs):
-        refresh = request.COOKIES.get('refresh_token')
-        if not refresh:
-            log.error('Refresh token is missing')
+        old_refresh = request.COOKIES.get('refresh_token')
+
+        if not old_refresh:
+            log.warning('Refresh token missing in cookies')
             return Response({'detail': 'You need to login'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        serializer = self.get_serializer(data={'refresh': refresh})
+        serializer = self.get_serializer(data={'refresh': old_refresh})
+
         try:
             serializer.is_valid(raise_exception=True)
+        except TokenError:
+            pass
         except Exception:
             log.error('Invalid refresh token')
-            return Response({'detail': 'You need to login'}, status=status.HTTP_401_UNAUTHORIZED)
+            response = Response({'detail': 'You need to login'}, status=status.HTTP_401_UNAUTHORIZED)
+            return AuthService.logout(response)
 
-        data = serializer.validated_data
-        access_token = data['access']
-        refresh_token = data['refresh']
+        new_access = serializer.validated_data.get('access')
+        new_refresh = serializer.validated_data.get('refresh')
+        print(new_refresh)
 
         response = Response()
-        response = self.usecase.execute(access_token, refresh_token, response)
 
-        return response
+        return AuthService.set_auth_cookies(response, new_access, new_refresh)

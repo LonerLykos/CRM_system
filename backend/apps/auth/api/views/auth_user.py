@@ -1,11 +1,11 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from rest_framework.generics import RetrieveAPIView
+from apps.auth.selectors.user_selectors import UserSelector
 from apps.auth.serializers.user_serializer import AuthUserSerializer
-from apps.auth.usecases.get_current_user import GetCurrentUserUseCase
-from apps.auth.repositories.user_repository import UserRepository
 
-class AuthUserView(APIView):
-    def get(self, request):
-        usecase = GetCurrentUserUseCase(UserRepository())
-        user = usecase.execute(request.user.id)
-        return Response(AuthUserSerializer(user).data)
+
+class AuthUserView(RetrieveAPIView):
+    serializer_class = AuthUserSerializer
+    selector = UserSelector()
+
+    def get_object(self):
+        return self.selector.get_user_by_id(self.kwargs['pk'])

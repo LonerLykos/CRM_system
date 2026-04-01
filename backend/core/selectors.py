@@ -8,7 +8,7 @@ class BaseSelector:
         return self.model.objects.all()
 
     def get_by_id(self, pk):
-        return get_object_or_404(self.get_queryset(), pk=pk)
+        return self.get_queryset().filter(pk=pk).first()
 
     def list(self):
         return self.get_queryset().all()
