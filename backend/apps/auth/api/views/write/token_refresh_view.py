@@ -1,6 +1,5 @@
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.views import TokenRefreshView
 from apps.auth.services.auth_service import AuthService
 import structlog
@@ -14,23 +13,31 @@ class CookieTokenRefreshView(TokenRefreshView):
 
         if not old_refresh:
             log.warning('Refresh token missing in cookies')
-            return Response({'detail': 'You need to login'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'detail': 'You need to login'}, status.HTTP_401_UNAUTHORIZED)
 
-        serializer = self.get_serializer(data={'refresh': old_refresh})
+        serializer = self.get_serializer({'refresh': old_refresh})
 
         try:
             serializer.is_valid(raise_exception=True)
-        except TokenError:
-            pass
-        except Exception:
-            log.error('Invalid refresh token')
-            response = Response({'detail': 'You need to login'}, status=status.HTTP_401_UNAUTHORIZED)
-            return AuthService.logout(response)
+        except Exception as e:
+            log.error(f'Invalid refresh token: {str(e)}')
+            response = Response({'detail': 'You need to login'}, status.HTTP_401_UNAUTHORIZED)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            AuthService.blacklist_token(old_refresh)
+            return response
 
         new_access = serializer.validated_data.get('access')
         new_refresh = serializer.validated_data.get('refresh')
-        print(new_refresh)
 
-        response = Response()
+        data = {
+            "message": "Successful",
+            "access_token": new_access,
+            "refresh_token": new_refresh,
+        }
 
-        return AuthService.set_auth_cookies(response, new_access, new_refresh)
+        response = Response(data, status.HTTP_200_OK)
+        response.set_cookie("access_token", new_access, **AuthService.set_cookie_settings())
+        response.set_cookie("refresh_token", new_refresh, **AuthService.set_cookie_settings())
+
+        return response

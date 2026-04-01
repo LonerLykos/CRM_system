@@ -9,4 +9,4 @@ class OrderSelector(BaseSelector):
         return self.model.objects.for_list()
 
     def get_by_id(self, pk: int):
-        return self.model.objects.for_detail().get(pk=pk)
+        return self.model.objects.for_detail().filter(pk=pk).first()
