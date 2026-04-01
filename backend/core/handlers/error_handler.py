@@ -1,6 +1,9 @@
+import structlog
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 from core.exceptions.mappers import EXCEPTION_MAP
+
+log = structlog.get_logger()
 
 
 def error_handler(exc: Exception, context:dict):
@@ -18,5 +21,5 @@ def error_handler(exc: Exception, context:dict):
             {'detail': mapping['detail']},
             status=mapping['status']
         )
-
+    log.error(f'Unhandled exception: {exc_class}', error=str(exc), context=context)
     return None

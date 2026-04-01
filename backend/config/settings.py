@@ -126,5 +126,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APPEND_SLASH = False
 
+FRONTEND_URL = os.environ.get('NEXT_PUBLIC_FRONTEND_URL')
+
 from config.extra_conf.logging_conf import setup_logging
 setup_logging()

@@ -2,18 +2,39 @@ from rest_framework import serializers
 from apps.users.models import UserModel
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ("id", "email", "name", "surname", "is_active", "is_banned", "last_login", "avatar_hash")
-        read_only_fields = ("id", "is_active", "is_staff", "is_superuser", "last_login", "avatar_hash")
-        extra_kwargs = {
-            "password": {"write_only": True},
-        }
+        fields = ("id", "email", "name", "surname")
+        read_only_fields = ("id",)
 
+
+class UserCreateSerializer(UserBaseSerializer):
     def create(self, validated_data):
-        user = UserModel(**validated_data)
-        user.set_unusable_password()
-        user.is_active = False
-        user.save()
-        return user
+        return UserModel.objects.create_user(**validated_data)
+
+
+class UserResponseSerializer(UserBaseSerializer):
+    class Meta:
+        model = UserModel
+        fields = UserBaseSerializer.Meta.fields + (
+            "is_active",
+            "is_banned",
+            "is_staff",
+            "last_login",
+            "avatar_hash",
+            "created_at",
+            "updated_at",
+        )
+
+        read_only_fields = UserBaseSerializer.Meta.read_only_fields + (
+            "is_active",
+            "is_banned",
+            "is_staff",
+            "last_login",
+            "avatar_hash",
+            "created_at",
+            "updated_at",
+            "is_superuser",
+        )
+

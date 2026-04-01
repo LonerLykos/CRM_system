@@ -1,16 +1,10 @@
 from rest_framework import status
-from rest_framework.generics import ListCreateAPIView, UpdateAPIView, RetrieveAPIView
+from rest_framework.generics import UpdateAPIView
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from apps.users.serializers import UserSerializer
 
 UserModel = get_user_model()
-
-
-class UserListView(ListCreateAPIView):
-    queryset = UserModel.objects.all()
-    serializer_class = UserSerializer
-
 
 class UserActivateView(UpdateAPIView):
     queryset = UserModel.objects.all()

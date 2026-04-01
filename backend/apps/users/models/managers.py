@@ -6,9 +6,6 @@ class UserManager(Manager):
         if not email:
             raise ValueError('Users must have an email address')
 
-        if not password:
-            raise ValueError('Users must have a password')
-
         if not name:
             raise ValueError('Users must have a name')
 
@@ -17,7 +14,12 @@ class UserManager(Manager):
 
         email = self.normalize_email(email)
         user = self.model(email=email, name=name, surname=surname, **extra_fields)
-        user.set_password(password)
+
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+
         user.save()
         return user
 
