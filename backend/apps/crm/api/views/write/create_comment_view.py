@@ -6,8 +6,10 @@ from apps.crm.services.comment_services import CommentService
 
 
 class CreateCommentView(APIView):
+    serializer_class = CommentsSerializer
+
     def post(self, request, pk):
-        serializer = CommentsSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         service = CommentService(user=request.user)
@@ -17,4 +19,4 @@ class CreateCommentView(APIView):
             text=serializer.validated_data['comment']
         )
 
-        return Response(CommentsSerializer(comment).data, status=status.HTTP_201_CREATED)
+        return Response(self.serializer_class(comment).data, status=status.HTTP_201_CREATED)

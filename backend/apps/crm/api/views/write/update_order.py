@@ -6,8 +6,10 @@ from apps.crm.services.order_services import OrderService
 
 
 class OrderUpdateView(APIView):
+    serializer_class = OrderDetailSerializer
+
     def patch(self, request, pk):
-        serializer = OrderDetailSerializer(data=request.data, partial=True)
+        serializer = self.serializer_class(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
         service = OrderService(user=request.user)
@@ -17,4 +19,4 @@ class OrderUpdateView(APIView):
             data=serializer.validated_data
         )
 
-        return Response(OrderDetailSerializer(order).data, status=status.HTTP_200_OK)
+        return Response(self.serializer_class(order).data, status=status.HTTP_200_OK)

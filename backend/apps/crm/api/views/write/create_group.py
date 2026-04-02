@@ -6,12 +6,14 @@ from apps.crm.services.group_service import GroupsService
 
 
 class AddGroupView(APIView):
+    serializer_class = GroupsSerializer
+
     def post(self, request):
-        serializer = GroupsSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         service = GroupsService()
 
         group, created = service.create_group(name=serializer.validated_data['name'])
         status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
-        return Response(GroupsSerializer(group).data, status=status_code)
+        return Response(self.serializer_class(group).data, status=status_code)

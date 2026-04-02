@@ -12,7 +12,7 @@ class UserService:
     def create(cls, data: dict) :
         user = cls.user_selector.model.objects.create(**data)
         token = JWTService.create_token(user, PasswordToken)
-        return token
+        return token, user
 
     @classmethod
     @transaction.atomic
@@ -53,5 +53,7 @@ class UserService:
         current_user = cls.user_selector.get_by_id(user_id)
         if not current_user:
             raise UserNotFound()
+        current_user.set_unusable_password()
+        current_user.save()
         token = JWTService.create_token(current_user, PasswordToken)
-        return token
+        return token, current_user

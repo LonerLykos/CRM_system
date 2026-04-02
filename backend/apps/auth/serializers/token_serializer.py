@@ -18,10 +18,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if reason:
             log.warning(
                 "Login attempt failed",
-                username=getattr(user, "username", None),
-                email=getattr(user, "email", None),
+                id=user.id,
+                username=user.name,
+                email=user.email,
                 reason=reason
             )
-            raise serializers.ValidationError("Invalid credentials or account inactive.")
+            raise serializers.AuthenticationFailed("Invalid credentials or account inactive.")
 
         return data
