@@ -17,4 +17,6 @@ export interface ISearchParams {
     created_at_lte?: string;
     created_at_gte?: string;
     my?: string;
+    error?: string;
+    update_order?: string;
 }

@@ -1,5 +1,4 @@
-export interface IOrderResponse{
-    id: number,
+export interface IOrderRequest {
     name?: string,
     surname?: string,
     email?: string,
@@ -10,13 +9,16 @@ export interface IOrderResponse{
     course_type?: string,
     sum?: number,
     already_paid?: number,
+    status?: string,
+    group?: string,
+}
+
+export interface IOrderResponse extends IOrderRequest{
+    id: number,
     created_at: string,
     utm?: string,
     msg?: string,
-    status?: string,
-    group?: string,
     manager?: string,
-
 }
 
 export type OrderBase = Omit<IOrderResponse, 'utm' | 'msg'>

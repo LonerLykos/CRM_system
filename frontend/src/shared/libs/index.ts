@@ -4,4 +4,5 @@ export {setCookies} from './cookies/set-cookies';
 export {getDynamicSlots} from './pagination/getDynamicSlots';
 export {formatDate} from './formatDate/formatDate';
 export {rebuildParams} from './url/rebuildParams';
+export {cleanParams} from './url/cleanParams';
 export {zod} from './zod/zod';

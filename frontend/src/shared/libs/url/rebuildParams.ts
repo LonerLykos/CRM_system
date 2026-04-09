@@ -1,4 +1,5 @@
 import {ISearchParams} from "@/shared/model";
+import {cleanParams} from "@/shared/libs";
 
 
 export function rebuildParams(params: ISearchParams, newValue: Partial<ISearchParams>): string {
@@ -9,13 +10,14 @@ export function rebuildParams(params: ISearchParams, newValue: Partial<ISearchPa
     const isPageChanging = !!newValue.page;
 
     if (isSameOrder || isPageChanging) {
-        const { orderId, ...rest } = merged;
+        const {orderId, ...rest} = merged;
         merged = rest;
     }
 
-    const cleanParams = Object.fromEntries(
-        Object.entries(merged)
-            .filter(([_, v]) => v != null && v !== "")
-    );
-    return new URLSearchParams(cleanParams as Record<string, string>).toString();
+    if (Object.keys(newValue).length > 0 && !('error' in newValue)) {
+        const {error, ...rest} = merged
+        merged = rest
+    }
+
+    return cleanParams(merged)
 }

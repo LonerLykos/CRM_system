@@ -1,4 +1,4 @@
-export type {IOrderResponse, OrderBase, IOrderDetailResponse} from './model/api.types';
+export type {IOrderRequest, IOrderResponse, OrderBase, IOrderDetailResponse} from './model/api.types';
 export {orderService} from './api/order.service';
 export {orderingToggle} from './lib/orderingParamsToggle';
 export {columns} from './config/columns';

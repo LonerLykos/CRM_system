@@ -5,8 +5,6 @@ import {revalidatePath} from "next/cache";
 import {loginSchema} from "@/features/auth-login";
 import {authService} from '@/entities/auth'
 import {setCookies} from "@/shared/libs";
-import {crmService} from "@/entities/crm";
-import {cookies} from "next/headers";
 
 
 export async function loginAction(formData: FormData) {
@@ -28,14 +26,11 @@ export async function loginAction(formData: FormData) {
 
     if (!ok) {
         if (status === 500) {
-            redirect(`/auth?error=${encodeURIComponent('Сервер не відповідає')}`)
+            redirect(`/auth?error=${encodeURIComponent('The server is not responding')}`)
         } else if ('detail' in error) {
             redirect(`/auth?error=${encodeURIComponent(error.detail as string)}`)
         } else if ('statusText' in error) {
             redirect(`/auth?error=${encodeURIComponent(error.statusText as string)}`)
         }
     }
-
-    revalidatePath('/', 'layout')
-    redirect('/crm')
 }

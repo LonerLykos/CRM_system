@@ -5,7 +5,7 @@ import {urls} from "@/shared/config";
 
 export const authService = {
     login: (data: ILoginRequest) => api.post<ITokenPair, ILoginRequest>(
-        `${urls.auth.login}`,
+        urls.auth.login,
         data
     ),
     getMe: () => api.get<ICurrentUser>(

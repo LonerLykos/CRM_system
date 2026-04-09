@@ -7,6 +7,8 @@ import {CommentDetail, ICommentResponse} from "@/entities/comment";
 import {ISearchParams} from "@/shared/model";
 import {rebuildParams} from "@/shared/libs";
 import s from './OrderTable.module.sass';
+import {CommentForm} from "@/features/comment-create";
+import {OrderUpdateForm} from "@/features/order-update";
 
 interface OrderTableProps {
     orders: IOrderResponse[];
@@ -28,6 +30,9 @@ export const OrderTable = async ({
         const query = rebuildParams(params, {order: newOrder, page: '1'});
         return `/crm?${query}`;
     };
+
+    const error = params.error
+    const update_order = params.update_order
 
     return (
         <table className={s.ordersTable}>
@@ -66,12 +71,19 @@ export const OrderTable = async ({
                                             ))}
                                         </div>
                                         <div className={s.commentForm}>
-                                            <input type="text" placeholder="Comment"/>
-                                            <button>SUBMIT</button>
+                                            <CommentForm params={params}/>
+                                            <p className={s.errorMsg}>{error && error}</p>
                                         </div>
                                     </div>
 
-                                    <button className={s.editBtn}>EDIT</button>
+                                    {update_order
+                                        ? <OrderUpdateForm params={params}/>
+                                        : <Link href={
+                                            `/crm?${rebuildParams(
+                                                params,
+                                                {update_order: String(order.id)}
+                                            )}`
+                                        }>EDIT</Link>}
                                 </div>
                             </td>
                         </tr>
