@@ -10,7 +10,9 @@ services:
     ports:
       - "${BACKEND_PORT}:8000"
     command: >
-      sh -c "python manage.py wait_db && python manage.py migrate --noinput && exec python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py wait_db &&
+      python manage.py migrate --noinput &&
+      exec gunicorn --workers 3 --bind 0.0.0.0:8000 config.wsgi:application"
     networks:
       - app_network
     deploy:
