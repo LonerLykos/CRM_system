@@ -8,7 +8,7 @@ export const orderService = {
         urls.crm.orders, params
     ),
     getOrderById: <T>(id: string) => api.get<IOrderDetailResponse<T>>(urls.crm.byId(id)),
-    updateOrder: <T>(id: string, data: IOrderRequest) => api.post<IOrderDetailResponse<T>, IOrderRequest>(urls.crm.orderUpdate(id), data)
+    updateOrder: <T>(id: string, data: IOrderRequest) => api.patch<IOrderDetailResponse<T>, IOrderRequest>(urls.crm.orderUpdate(id), data)
 }
 
 

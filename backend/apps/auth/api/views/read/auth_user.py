@@ -1,4 +1,5 @@
 from rest_framework.generics import RetrieveAPIView
+
 from apps.auth.serializers.user_serializer import AuthUserSerializer
 
 

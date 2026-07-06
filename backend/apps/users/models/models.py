@@ -1,8 +1,10 @@
 import hashlib
+
+from core.models import BaseModel
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+
 from .managers import UserManager
-from core.models import BaseModel
 
 
 class UserModel(AbstractBaseUser, PermissionsMixin, BaseModel):
@@ -21,7 +23,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin, BaseModel):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'surname']
 
-    objects = UserManager()
+    objects: UserManager = UserManager()
 
     def save(self, *args, **kwargs):
         if self.email:

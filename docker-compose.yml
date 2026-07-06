@@ -5,6 +5,7 @@ services:
       dockerfile: ./backend/Dockerfile
     volumes:
       - ./backend:/app
+      - exports_media:/app/media
     env_file:
       - .env
     ports:
@@ -13,6 +14,38 @@ services:
       sh -c "python manage.py wait_db &&
       python manage.py migrate --noinput &&
       exec gunicorn --workers 3 --bind 0.0.0.0:8000 config.wsgi:application"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+      start_interval: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    volumes:
+      - ./backend:/app
+      - exports_media:/app/media
+    env_file:
+      - .env
+    command: >
+      sh -c "python manage.py wait_db &&
+      exec celery -A config worker -l info"
+    depends_on:
+      redis:
+        condition: service_healthy
     networks:
       - app_network
     deploy:
@@ -20,12 +53,53 @@ services:
         limits:
           memory: 1G
 
+  celery-beat:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    volumes:
+      - ./backend:/app
+      - exports_media:/app/media
+    env_file:
+      - .env
+    command: celery -A config beat -l info
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
   frontend:
     build:
       context: ./frontend
+    depends_on:
+      crm:
+        condition: service_healthy
     networks:
       - app_network
 
 networks:
   app_network:
     driver: bridge
+
+volumes:
+  exports_media:

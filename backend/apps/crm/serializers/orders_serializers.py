@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from apps.crm.models.group_model import GroupModel
 from apps.crm.models.orders_model import OrdersModel
 from apps.crm.serializers.comments_serializers import CommentsSerializer
@@ -6,6 +7,7 @@ from apps.crm.serializers.comments_serializers import CommentsSerializer
 
 class OrderBaseSerializer(serializers.ModelSerializer):
     manager = serializers.CharField(source="manager.surname", read_only=True, default=None)
+    manager_id = serializers.IntegerField(read_only=True)
 
     group = serializers.PrimaryKeyRelatedField(
         queryset=GroupModel.objects.all(),
@@ -18,9 +20,9 @@ class OrderBaseSerializer(serializers.ModelSerializer):
         fields = (
             "id", "name", "surname", "email", "phone", "age", "course",
             "course_format", "course_type", "sum", "already_paid",
-            "created_at", "utm", "msg", "status", "group", "manager"
+            "created_at", "utm", "msg", "status", "group", "manager", "manager_id"
         )
-        read_only_fields = ("id", "created_at", "manager")
+        read_only_fields = ("id", "created_at", "manager", "manager_id")
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

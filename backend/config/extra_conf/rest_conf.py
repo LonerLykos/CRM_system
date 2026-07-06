@@ -13,4 +13,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated', 'core.permissions.is_unbanned_user.IsUnbannedUser',
     ],
     'EXCEPTION_HANDLER': 'core.handlers.error_handler.error_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_RATES': {
+        'auth': '10/min',
+    },
 }

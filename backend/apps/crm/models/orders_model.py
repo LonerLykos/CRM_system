@@ -1,16 +1,28 @@
+from core.models import BaseModel
 from django.db import models
+
 from apps.crm.models.choices_models import CoursesChoices, CoursesFormatChoices, CoursesTypeChoices, StatusChoices
 from apps.crm.models.group_model import GroupModel
 from apps.users.models.models import UserModel
-from core.models import BaseModel
 
 
-class OrderQuerySet(models.QuerySet):
-    def for_list(self):
+class OrderQuerySet(models.QuerySet["OrdersModel"]):
+    def for_list(self) -> "OrderQuerySet":
         return self.select_related('manager', 'group')
 
-    def for_detail(self):
+    def for_detail(self) -> "OrderQuerySet":
         return self.select_related('manager', 'group').prefetch_related('comments')
+
+
+class OrderManager(models.Manager["OrdersModel"]):
+    def get_queryset(self) -> OrderQuerySet:
+        return OrderQuerySet(self.model, using=self._db)
+
+    def for_list(self) -> OrderQuerySet:
+        return self.get_queryset().for_list()
+
+    def for_detail(self) -> OrderQuerySet:
+        return self.get_queryset().for_detail()
 
 
 class OrdersModel(BaseModel):
@@ -21,7 +33,7 @@ class OrdersModel(BaseModel):
     name = models.CharField(max_length=25, blank=True, null=True)
     surname = models.CharField(max_length=25, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=12, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
     course = models.CharField(
         max_length=10,
@@ -55,4 +67,4 @@ class OrdersModel(BaseModel):
     group = models.ForeignKey(GroupModel, related_name='orders', on_delete=models.SET_NULL, null=True)
     manager = models.ForeignKey(UserModel, related_name='orders', on_delete=models.SET_NULL, null=True)
 
-    objects = OrderQuerySet.as_manager()
+    objects: OrderManager = OrderManager()

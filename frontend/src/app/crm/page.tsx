@@ -1,4 +1,4 @@
-import {OrdersPage} from "@/pages/OrdersPage";
+import {OrdersPage} from "@/views/OrdersPage";
 import {ISearchParams} from "@/shared/model";
 
 

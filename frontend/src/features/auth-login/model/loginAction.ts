@@ -4,7 +4,7 @@ import {redirect} from 'next/navigation'
 import {revalidatePath} from "next/cache";
 import {loginSchema} from "@/features/auth-login";
 import {authService} from '@/entities/auth'
-import {setCookies} from "@/shared/libs";
+import {setCookies} from "@/shared/libs/cookies/set-cookies";
 
 
 export async function loginAction(formData: FormData) {

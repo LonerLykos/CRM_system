@@ -10,7 +10,7 @@ export const filterSet = [
     {key: 'course_type', value: 'Course type'},
     {key: 'course_format', value: 'Course format'},
     {key: 'status', value: 'Status'},
-    {key: 'group_name_contains', value: 'Group name'},
+    {key: 'group', value: 'Group'},
     {key: 'created_at_lte', value: 'Created_at_lte'},
     {key: 'created_at_gte', value: 'Created_at_gte'},
     {key: 'my', value: 'My'},

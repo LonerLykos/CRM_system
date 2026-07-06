@@ -12,7 +12,7 @@ def normalize_order_choices(data):
     for field, mode in CHOICE_FIELDS.items():
         value = result.get(field)
 
-        if not value or isinstance(value, str):
+        if not value or not isinstance(value, str):
             continue
 
         if mode == "upper":

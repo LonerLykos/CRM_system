@@ -1,16 +1,16 @@
 export interface IOrderRequest {
-    name?: string,
-    surname?: string,
-    email?: string,
-    phone?: string,
-    age?: number,
-    course?: string,
-    course_format?: string,
-    course_type?: string,
-    sum?: number,
-    already_paid?: number,
-    status?: string,
-    group?: string,
+    name?: string | null,
+    surname?: string | null,
+    email?: string | null,
+    phone?: string | null,
+    age?: number | null,
+    course?: string | null,
+    course_format?: string | null,
+    course_type?: string | null,
+    sum?: number | null,
+    already_paid?: number | null,
+    status?: string | null,
+    group?: string | null,
 }
 
 export interface IOrderResponse extends IOrderRequest{
@@ -19,6 +19,7 @@ export interface IOrderResponse extends IOrderRequest{
     utm?: string,
     msg?: string,
     manager?: string,
+    manager_id?: number | null,
 }
 
 export type OrderBase = Omit<IOrderResponse, 'utm' | 'msg'>

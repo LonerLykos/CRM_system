@@ -1,7 +1,8 @@
-from core.exceptions.users_exceptions import UserPermissionDenied, UserNotFound
-from django.db import transaction
-from apps.users.selectors.users_selectors import UsersSelector
+from core.exceptions.users_exceptions import SelfActionDenied, UserNotFound, UserPermissionDenied
 from core.services.jwt_service import JWTService, PasswordToken
+from django.db import transaction
+
+from apps.users.selectors.users_selectors import UsersSelector
 
 
 class UserService:
@@ -10,13 +11,15 @@ class UserService:
     @classmethod
     @transaction.atomic
     def create(cls, data: dict) :
-        user = cls.user_selector.model.objects.create(**data)
+        user = cls.user_selector.model.objects.create_user(**data)
         token = JWTService.create_token(user, PasswordToken)
         return token, user
 
     @classmethod
     @transaction.atomic
-    def user_active_toggle(cls, user_id):
+    def user_active_toggle(cls, user_id, requester_id=None):
+        if requester_id is not None and str(user_id) == str(requester_id):
+            raise SelfActionDenied()
         current_user = cls.user_selector.get_by_id(user_id)
         if not current_user:
             raise UserNotFound()
@@ -26,7 +29,9 @@ class UserService:
 
     @classmethod
     @transaction.atomic
-    def user_ban_toggle(cls, user_id):
+    def user_ban_toggle(cls, user_id, requester_id=None):
+        if requester_id is not None and str(user_id) == str(requester_id):
+            raise SelfActionDenied()
         current_user = cls.user_selector.get_by_id(user_id)
         if not current_user:
             raise UserNotFound()
@@ -36,7 +41,7 @@ class UserService:
 
     @classmethod
     @transaction.atomic
-    def user_set_password(cls, password: str, token: str = None):
+    def user_set_password(cls, password: str, token: str | None = None):
         if not token:
             raise UserPermissionDenied
         user_id = JWTService.verify_token(token, PasswordToken)

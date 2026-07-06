@@ -1,7 +1,14 @@
-from django.contrib.auth.models import UserManager as Manager
+from typing import TYPE_CHECKING
+
+from django.contrib.auth.base_user import BaseUserManager
+
+if TYPE_CHECKING:
+    from .models import UserModel  # noqa: F401
 
 
-class UserManager(Manager):
+class UserManager(BaseUserManager["UserModel"]):
+    use_in_migrations = True
+
     def create_user(self, email=None, password=None, name=None, surname=None, **extra_fields):
         if not email:
             raise ValueError('Users must have an email address')

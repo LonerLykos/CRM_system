@@ -1,4 +1,4 @@
-import {LoginPage} from "@/pages/login";
+import {LoginPage} from "@/views/login";
 
 export default async function Page({searchParams}: {searchParams: Promise<{error?: string}>}) {
 

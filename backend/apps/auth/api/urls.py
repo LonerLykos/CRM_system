@@ -1,4 +1,5 @@
 from django.urls import path
+
 from .views.read.auth_user import AuthUserView
 from .views.write.logout_view import LogoutView
 from .views.write.token_obtain_view import CookieTokenObtainPairView

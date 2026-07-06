@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap')
+
+// ============================================================
+//  Design tokens — authored in SASS, exposed as CSS custom
+//  properties so every *.module.sass can read them via var()
+//  without an @use import. Accent: Teal (variant A).
+// ============================================================
+\:root
+  // ----- brand accent (teal) -----
+  --acc: #14b8a6
+  --acc-strong: #0d9488
+  --acc-ink: #0f766e
+  --acc-tint: #e6faf6
+  --acc-ring: rgba(20, 184, 166, 0.24)
+
+  // ----- ink / text -----
+  --ink: #1f2937
+  --ink-muted: #6b7280
+  --ink-faint: #9ca3af
+
+  // ----- surfaces / lines -----
+  --app-bg: #f7f6f2
+  --surface: #ffffff
+  --line: #e6e3db
+  --line-strong: #d6d3cc
+
+  // ----- semantic status (separate from the accent hue) -----
+  --danger: #dc2626
+  --danger-bg: #fef3f2
+  --danger-line: #fecdca
+
+  // ----- radius / shadow / motion -----
+  --radius-sm: 8px
+  --radius-md: 10px
+  --radius-lg: 16px
+  --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.06)
+  --shadow-md: 0 10px 30px -10px rgba(24, 24, 27, 0.18)
+  --shadow-lg: 0 24px 60px -22px rgba(24, 24, 27, 0.28)
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1)
+
+  // ----- secondary surface -----
+  --surface-2: #f6f5f1
+  --field-bg: #f9fafb
+
+  // ----- semantic actions (окремо від акценту) -----
+  --danger-strong: #b91c1c
+  --warning: #f57c00
+  --warning-strong: #e65100
+  --info: #0070f3
+  --info-strong: #005bb5
+
+  // ----- table zebra (чітко розрізнювана, гармонізована під палітру) -----
+  --row-even: #ffffff
+  --row-odd: #edeae2
+  --row-hover: var(--acc-tint)
+  --row-expanded: #f1fbf9
+
+.body
+  background-color: var(--app-bg)
+  color: var(--ink)
+  font-family: "Inter", system-ui, sans-serif
+  -webkit-font-smoothing: antialiased
+  transition: background-color 0.25s var(--ease), color 0.25s var(--ease)
+
+hr
+  border: none
+  border-top: 1px solid var(--line)
+  margin: 0
+
+.HomePage
+  display: flex
+  justify-content: center
+  align-items: center
+  margin-top: 270px
+  font-family: "Inter", serif
+  font-size: 20px
+
+// Keyboard focus — visible accent ring for a11y (mouse :focus is unaffected).
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible
+  outline: 2px solid var(--acc)
+  outline-offset: 2px
+
+// ============================================================
+//  Dark theme — token overrides. Follows OS (prefers-color-scheme)
+//  by default; a manual [data-theme] on <html> overrides it both ways.
+// ============================================================
+=dark-tokens
+  --acc: #2dd4bf
+  --acc-strong: #14b8a6
+  --acc-ink: #5eead4
+  --acc-tint: #17312d
+  --acc-ring: rgba(45, 212, 191, 0.30)
+
+  --ink: #e7e9ee
+  --ink-muted: #a3a9b5
+  --ink-faint: #6e7581
+
+  --app-bg: #14161b
+  --surface: #1c1f26
+  --surface-2: #232732
+  --line: #2c313b
+  --line-strong: #3a414d
+  --field-bg: #171a20
+
+  --danger: #f87171
+  --danger-strong: #ef4444
+  --danger-bg: #2a1618
+  --danger-line: #5c2a2c
+  --warning: #fb923c
+  --warning-strong: #f97316
+  --info: #60a5fa
+  --info-strong: #3b82f6
+
+  --row-even: #1c1f26
+  --row-odd: #23262e
+  --row-hover: var(--acc-tint)
+  --row-expanded: #182420
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45)
+  --shadow-md: 0 10px 30px -10px rgba(0, 0, 0, 0.55)
+  --shadow-lg: 0 24px 60px -22px rgba(0, 0, 0, 0.70)
+
+@media (prefers-color-scheme: dark)
+  \:root:not([data-theme="light"])
+    +dark-tokens
+
+\:root[data-theme="dark"]
+  +dark-tokens
+
+// Solid-black monochrome PNG icons (Work, administrator) → invert to light in
+// dark theme, otherwise they vanish on the dark bar. Colored icons untouched.
+@media (prefers-color-scheme: dark)
+  \:root:not([data-theme="light"]) .icon-invert-dark
+    filter: invert(1)
+
+\:root[data-theme="dark"] .icon-invert-dark
+  filter: invert(1)

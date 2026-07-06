@@ -4,6 +4,7 @@ export interface ILoginRequest {
 }
 
 export interface ICurrentUser {
+    id: number;
     name: string;
     surname: string;
     is_staff: boolean;

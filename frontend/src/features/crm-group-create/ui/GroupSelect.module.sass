@@ -1,0 +1,105 @@
+.wrap
+  position: relative
+  width: 100%
+
+.row
+  display: flex
+  gap: 8px
+  align-items: stretch
+
+.input
+  flex: 1 1 auto
+  box-sizing: border-box
+  height: 38px
+  padding: 0 12px
+  font-size: 14px
+  color: var(--ink)
+  background: var(--field-bg)
+  border: 1px solid var(--line-strong)
+  border-radius: 6px
+  outline: none
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease
+
+  &::placeholder
+    color: var(--ink-faint)
+
+  &:focus
+    background: var(--surface)
+    border-color: var(--acc)
+    box-shadow: 0 0 0 3px var(--acc-ring)
+
+.addBtn
+  flex: 0 0 auto
+  height: 38px
+  padding: 0 14px
+  font-size: 13px
+  font-weight: 600
+  color: #ffffff
+  background: var(--acc)
+  border: none
+  border-radius: 6px
+  cursor: pointer
+  white-space: nowrap
+  transition: background 0.15s ease
+
+  &:hover:not(:disabled)
+    background: var(--acc-strong)
+
+  &:disabled
+    background: #cbd5e1
+    cursor: not-allowed
+
+.dropdown
+  position: absolute
+  z-index: 20
+  top: calc(100% + 4px)
+  left: 0
+  right: 0
+  margin: 0
+  padding: 4px
+  list-style: none
+  max-height: 220px
+  overflow-y: auto
+  background: var(--surface)
+  border: 1px solid var(--line)
+  border-radius: 8px
+  box-shadow: var(--shadow-md)
+
+.option
+  padding: 8px 10px
+  font-size: 14px
+  color: #374151
+  border-radius: 6px
+  cursor: pointer
+
+  &:hover
+    background: var(--surface-2)
+
+.active
+  background: var(--acc-tint)
+  color: var(--acc-ink)
+  font-weight: 600
+
+.empty
+  padding: 8px 10px
+  font-size: 13px
+  color: var(--ink-faint)
+
+.create
+  margin-top: 2px
+  padding: 8px 10px
+  font-size: 14px
+  font-weight: 600
+  color: var(--acc-ink)
+  border-top: 1px solid var(--line)
+  border-radius: 6px
+  cursor: pointer
+
+  &:hover
+    background: var(--acc-tint)
+
+.error
+  display: block
+  margin-top: 4px
+  font-size: 12px
+  color: var(--danger)

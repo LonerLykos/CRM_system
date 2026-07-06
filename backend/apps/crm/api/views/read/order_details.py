@@ -1,8 +1,8 @@
-from django.http import Http404
+from core.exceptions.orders_exceptions import OrderNotFound
 from rest_framework.generics import RetrieveAPIView
+
 from apps.crm.selectors.order_selectors import OrderSelector
 from apps.crm.serializers.orders_serializers import OrderDetailSerializer
-from core.exceptions.orders_exceptions import OrderNotFound
 
 
 class OrderDetails(RetrieveAPIView):

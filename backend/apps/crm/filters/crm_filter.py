@@ -1,5 +1,7 @@
 from django_filters import rest_framework as filters
-from apps.crm.models.orders_model import CoursesChoices, CoursesTypeChoices, CoursesFormatChoices, StatusChoices
+
+from apps.crm.models.group_model import GroupModel
+from apps.crm.models.orders_model import CoursesChoices, CoursesFormatChoices, CoursesTypeChoices, StatusChoices
 
 
 class OrderFilter(filters.FilterSet):
@@ -14,6 +16,7 @@ class OrderFilter(filters.FilterSet):
     sum_eq = filters.NumberFilter(field_name='sum', lookup_expr='exact')
     already_paid_eq = filters.NumberFilter(field_name='already_paid', lookup_expr='exact')
     status = filters.ChoiceFilter('status', choices=StatusChoices.choices)
+    group = filters.ModelChoiceFilter(field_name='group', queryset=GroupModel.objects.all())
     group_name_contains = filters.CharFilter(field_name='group__name', lookup_expr='icontains')
     created_at_lte = filters.DateTimeFilter(field_name='created_at', lookup_expr='lte')
     created_at_gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
@@ -39,6 +42,7 @@ class OrderFilter(filters.FilterSet):
     )
 
     def filter_my_orders(self, queryset, name, value):
-        if value and self.request.user.is_authenticated:
-            return queryset.filter(manager=self.request.user)
+        request = self.request
+        if value and request is not None and request.user.is_authenticated:
+            return queryset.filter(manager=request.user)
         return queryset

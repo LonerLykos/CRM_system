@@ -1,5 +1,3 @@
-'use server'
-
 import {OrderBase} from "@/entities/order";
 import Link from "next/link";
 import {ISearchParams} from "@/shared/model";

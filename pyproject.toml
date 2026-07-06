@@ -1,14 +1,59 @@
 [project]
 name = "crm-system"
 version = "0.1.0"
-description = "Add your description here"
+description = "backend for CRM system"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "celery[redis]>=5.4",
+    "django>=5.2,<5.3",
     "django-filter>=25.2",
     "djangorestframework>=3.17.1",
     "djangorestframework-simplejwt[crypto]>=5.5.1",
+    "drf-spectacular>=0.29.0",
     "gunicorn>=26.0.0",
     "mysqlclient>=2.2.8",
+    "openpyxl>=3.1",
     "structlog>=25.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "celery-types>=0.22.0",
+    "django-types>=0.24.0",
+    "djangorestframework-types>=0.9.0",
+    "pytest>=9.0.3",
+    "pytest-django>=4.12.0",
+    "ruff>=0.9.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+# Line length is a formatter concern; not enforced as a lint error.
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/config/settings.py" = ["F403", "F405", "E402"]
+"backend/config/settings_test.py" = ["F403", "F405"]
+"backend/config/extra_conf/__init__.py" = ["F403", "F405"]
+
+[tool.pyright]
+include = ["backend"]
+extraPaths = ["backend"]
+venvPath = "."
+venv = ".venv"
+reportIncompatibleVariableOverride = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings_test"
+pythonpath = ["backend"]
+python_files = ["test_*.py", "*_test.py"]
+testpaths = ["backend"]
+addopts = "-p no:cacheprovider"
+filterwarnings = [
+    "ignore:DateTimeField .* received a naive datetime:RuntimeWarning",
 ]

@@ -34,7 +34,7 @@ export default async function proxy(request: NextRequest) {
         return NextResponse.next()
     }
 
-    if (pathname.startsWith('/auth')) {
+    if (pathname.startsWith('/auth') || pathname.startsWith('/set-password')) {
         return NextResponse.next();
     }
 

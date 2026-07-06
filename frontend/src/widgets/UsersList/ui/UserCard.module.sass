@@ -1,0 +1,84 @@
+.card
+  background: var(--surface)
+  border: 1px solid var(--line)
+  border-radius: 10px
+  padding: 16px 18px
+  display: flex
+  flex-direction: column
+  gap: 10px
+  transition: box-shadow 0.2s, border-color 0.2s
+  &:hover
+    box-shadow: var(--shadow-md)
+    border-color: var(--line-strong)
+
+.inactive
+  border-left: 4px solid #aaa
+
+.banned
+  border-left: 4px solid var(--danger)
+
+.header
+  display: flex
+  justify-content: space-between
+  align-items: center
+
+.id
+  font-size: 0.85rem
+  color: var(--ink-faint)
+  font-weight: 600
+
+.badges
+  display: flex
+  gap: 6px
+
+.badge
+  font-size: 0.72rem
+  font-weight: 700
+  padding: 2px 7px
+  border-radius: 20px
+  letter-spacing: 0.03em
+
+.badgeInactive
+  background: #e0e0e0
+  color: #555
+
+.badgeBanned
+  background: #ffcdd2
+  color: #c62828
+
+.badgeStaff
+  background: var(--acc-tint)
+  color: var(--acc-ink)
+
+.info
+  display: flex
+  flex-direction: column
+  gap: 2px
+
+.name
+  font-size: 1rem
+  font-weight: 700
+  color: var(--ink)
+  margin: 0
+
+.email
+  font-size: 0.85rem
+  color: var(--ink-muted)
+  margin: 0
+
+.lastLogin
+  font-size: 0.8rem
+  color: var(--ink-faint)
+  margin: 0
+
+.stats
+  display: flex
+  flex-wrap: wrap
+  gap: 6px 14px
+  padding: 8px 10px
+  background: var(--surface-2)
+  border-radius: 6px
+
+.statItem
+  font-size: 0.8rem
+  color: #444

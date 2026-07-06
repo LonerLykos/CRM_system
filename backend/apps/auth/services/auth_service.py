@@ -1,7 +1,8 @@
+from typing import Any, cast
+
 import structlog
 from django.conf import settings
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken, Token
+from rest_framework_simplejwt.tokens import RefreshToken
 
 log = structlog.get_logger()
 
@@ -17,10 +18,10 @@ class AuthService:
         }
 
     @staticmethod
-    def blacklist_token(refresh_token: str = None):
+    def blacklist_token(refresh_token: str | None = None):
         if refresh_token:
             try:
-                token = RefreshToken(refresh_token)
+                token = RefreshToken(cast(Any, refresh_token))
                 token.blacklist()
             except Exception:
                 log.exception("Failed to blacklist")

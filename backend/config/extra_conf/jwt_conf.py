@@ -1,6 +1,7 @@
 import base64
-from datetime import timedelta
 import os
+from datetime import timedelta
+
 
 def decode_key(env_var: str) -> str:
     val = os.getenv(env_var)

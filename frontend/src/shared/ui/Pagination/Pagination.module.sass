@@ -2,54 +2,70 @@
   display: flex
   align-items: center
   justify-content: center
-  gap: 15px
-  margin: 40px 0
-  min-height: 50px
+  gap: 8px
+  margin: 12px 0 24px
+  min-height: 36px
 
 .pagesGrid
   display: grid
   grid-auto-flow: column
-  grid-auto-columns: 44px 
+  grid-auto-columns: 36px
   gap: 6px
   justify-content: center
 
 .slot
-  width: 44px
-  height: 44px
+  width: 36px
+  height: 36px
   display: flex
   justify-content: center
   align-items: center
+
+.btn, .dots, .navBtn
+  display: flex
+  align-items: center
+  justify-content: center
+  font-weight: 650
+  text-decoration: none
+  font-variant-numeric: tabular-nums
+  transition: background 0.15s var(--ease), color 0.15s var(--ease), border-color 0.15s var(--ease)
 
 .btn, .dots
-  display: flex
-  align-items: center
-  justify-content: center
-  width: 42px
-  height: 42px
-  border-radius: 50%
-  background-color: #00ff73
-  color: white
-  font-weight: 600
-  text-decoration: none
-  transition: 0.2s
+  width: 34px
+  height: 34px
+  border-radius: 9px
+  color: var(--ink-muted)
+  background: var(--surface)
+  border: 1px solid var(--line-strong)
 
-.active
-  background-color: #00a651
+.btn:hover
+  border-color: var(--acc)
+  color: var(--acc-ink)
+
+.dots
+  border: 0
+  background: transparent
+  cursor: default
+
+.active, .active:hover
+  background-color: var(--acc)
+  color: #ffffff
+  border-color: var(--acc)
 
 .navSlot
-  width: 75px
+  width: 60px
   display: flex
   justify-content: center
   &.invisible
     visibility: hidden
 
 .navBtn
-  width: 70px
-  height: 42px
-  background-color: #00ff73
-  color: white
-  border-radius: 25px
-  display: flex
-  align-items: center
-  justify-content: center
-  text-decoration: none
+  width: 58px
+  height: 34px
+  border-radius: 10px
+  color: var(--ink-muted)
+  background: var(--surface)
+  border: 1px solid var(--line-strong)
+
+  &:hover
+    border-color: var(--acc)
+    color: var(--acc-ink)

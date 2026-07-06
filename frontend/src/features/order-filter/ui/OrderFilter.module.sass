@@ -1,0 +1,135 @@
+.filterBar
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 10px
+  margin: 8px 10px
+  padding: 10px 12px
+  background: var(--surface)
+  border: 1px solid var(--line)
+  border-radius: 10px
+  box-shadow: var(--shadow-sm)
+  font-family: "Inter", system-ui, sans-serif
+
+.fields
+  flex: 1 1 0
+  min-width: 0
+  display: grid
+  // Fixed 7 columns → always exactly 2 rows (7 text inputs on row 1;
+  // 5 selects + the 2-column date range on row 2), so the layout never
+  // reflows into a third row and every field keeps a uniform width.
+  grid-template-columns: repeat(7, minmax(0, 1fr))
+  align-items: end
+  gap: 8px
+
+// Base control shared by text inputs, selects and date inputs.
+.control
+  box-sizing: border-box
+  width: 100%
+  height: 32px
+  padding: 0 8px
+  font-size: 13px
+  color: var(--ink)
+  background: var(--surface)
+  border: 1px solid var(--line-strong)
+  border-radius: 6px
+  outline: none
+  transition: border-color 0.15s ease, box-shadow 0.15s ease
+
+  &::placeholder
+    color: var(--ink-faint)
+
+  &:hover
+    border-color: #b9b4a9
+
+  &:focus
+    border-color: var(--acc)
+    box-shadow: 0 0 0 2px var(--acc-ring)
+
+select.control
+  cursor: pointer
+
+// Field wrapper with a small caption.
+.field
+  display: flex
+  flex-direction: column
+  gap: 2px
+
+.caption
+  padding-left: 2px
+  font-size: 10px
+  font-weight: 500
+  letter-spacing: 0.02em
+  text-transform: uppercase
+  color: var(--ink-muted)
+
+// Date "between" range: two bounds side by side under one caption.
+.dateRange
+  grid-column: span 2
+  display: flex
+  flex-direction: column
+  gap: 2px
+
+.dateRangeRow
+  display: flex
+  align-items: center
+  gap: 6px
+
+  .control
+    flex: 1 1 0
+    min-width: 0
+
+.dateSep
+  color: var(--ink-faint)
+  font-size: 13px
+
+.checkbox
+  display: inline-flex
+  align-items: center
+  gap: 5px
+  height: 24px
+  padding: 0 8px
+  font-size: 11px
+  color: #374151
+  background: var(--surface)
+  border: 1px solid var(--line-strong)
+  border-radius: 6px
+  cursor: pointer
+  user-select: none
+  white-space: nowrap
+
+  input
+    width: 12px
+    height: 12px
+    cursor: pointer
+    accent-color: var(--acc)
+
+.actions
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 6px
+  margin-left: auto
+
+.iconRow
+  display: flex
+  align-items: center
+  gap: 6px
+
+// Icon buttons: Reset (button) and Export (anchor) share this look.
+.iconBtn
+  all: unset
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  width: 34px
+  height: 34px
+  border-radius: 6px
+  cursor: pointer
+  transition: background 0.15s ease, transform 0.1s ease
+
+  &:hover
+    background: var(--surface-2)
+
+  &:active
+    transform: scale(0.94)

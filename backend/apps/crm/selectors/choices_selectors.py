@@ -1,4 +1,4 @@
-from apps.crm.models.choices_models import StatusChoices, CoursesChoices, CoursesTypeChoices, CoursesFormatChoices
+from apps.crm.models.choices_models import CoursesChoices, CoursesFormatChoices, CoursesTypeChoices, StatusChoices
 
 
 class ChoicesProvider:

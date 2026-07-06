@@ -10,10 +10,11 @@ export const CommentDetail = async ({comment}: CommentProp) => {
 
     return (
         <div className={s.commentCard}>
-            <p>{comment.comment}</p>
-            <p>{comment.name}</p>
-            <p>{comment.surname}</p>
-            <p>{formatDate(comment.created_at)}</p>
+            <div className={s.head}>
+                <span className={s.author}>{comment.name} {comment.surname}</span>
+                <span className={s.date}>{formatDate(comment.created_at)}</span>
+            </div>
+            <p className={s.text}>{comment.comment}</p>
         </div>
     )
 }

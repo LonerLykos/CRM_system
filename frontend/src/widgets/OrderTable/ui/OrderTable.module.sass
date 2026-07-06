@@ -28,7 +28,8 @@
     margin-left: 2px
 
   th
-    background-color: #00a651
+    background-color: var(--acc)
+    color: #ffffff
 
   th:nth-child(1) // ID
        width: 40px
@@ -76,28 +77,108 @@
        width: 100px
 
   tbody
+    // Zebra kept (rows stay clearly distinguishable), harmonized to the palette;
+    // row-hover tints on top of the stripe without erasing it.
+    .rowEven, .rowOdd
+      cursor: pointer
+      transition: background-color 0.12s var(--ease)
+
     .rowEven
-      background-color: #f1f1f1
+      background-color: var(--row-even)
 
     .rowOdd
-      background-color: #cecece
+      background-color: var(--row-odd)
+
+    .rowEven:hover, .rowOdd:hover
+      background-color: var(--row-hover)
 
     .expandedRow
-      background-color: #ffeedc
+      background-color: var(--row-expanded)
+
+      td
+        white-space: normal
+        overflow: visible
+        height: auto
+        vertical-align: top
 
     .detailsWrapper
       display: flex
-      justify-content: space-between
+      align-items: flex-start
+      gap: 16px
+      padding: 12px 14px
 
       .metaInfo
-        width: 30%
-
-      .commentsSection
-        width: 60%
-
-      .commentForm
+        flex: 0 0 22%
         display: flex
         flex-direction: column
+        gap: 6px
 
-        .errorMsg
-          height: 10px
+        p
+          margin: 0
+          padding: 6px 8px
+          font-size: 0.8rem
+          color: #374151
+          background: var(--surface)
+          border: 1px solid var(--line)
+          border-radius: 6px
+
+      .commentsSection
+        flex: 1 1 auto
+        min-width: 0
+        display: flex
+        flex-direction: column
+        gap: 8px
+
+        .commentsList
+          display: flex
+          flex-direction: column
+          gap: 6px
+          max-height: 180px
+          overflow-y: auto
+          padding-right: 2px
+
+        .commentForm
+          display: flex
+          flex-direction: column
+          gap: 2px
+
+          .errorMsg
+            margin: 0
+            min-height: 12px
+            font-size: 0.75rem
+            color: var(--danger)
+
+          .ownerMsg
+            margin: 0
+            font-size: 0.75rem
+            font-weight: 600
+            color: var(--danger)
+
+      .editLink
+        flex: 0 0 auto
+        align-self: flex-start
+        display: inline-block
+        width: auto
+        height: auto
+        padding: 7px 16px
+        background: var(--acc)
+        color: #ffffff
+        font-size: 0.8rem
+        font-weight: 600
+        text-align: center
+        text-decoration: none
+        border-radius: 6px
+
+        &:hover
+          background: var(--acc-strong)
+
+        &:visited
+          color: #ffffff
+
+      .editLinkDisabled
+        background: #e5e7eb
+        color: #9ca3af
+        cursor: not-allowed
+
+        &:hover
+          background: #e5e7eb

@@ -1,7 +1,8 @@
+from core.models import BaseModel
 from django.db import models
+
 from apps.crm.models.orders_model import OrdersModel
 from apps.users.models import UserModel
-from core.models import BaseModel
 
 
 class CommentsModel(BaseModel):

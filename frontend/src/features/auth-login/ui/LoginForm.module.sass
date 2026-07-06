@@ -1,0 +1,131 @@
+.card
+  width: 100%
+  max-width: 360px
+  display: flex
+  flex-direction: column
+  background: var(--surface)
+  border: 1px solid var(--line)
+  border-radius: var(--radius-lg)
+  box-shadow: var(--shadow-lg)
+  padding: 32px 30px 28px
+
+.mark
+  width: 46px
+  height: 46px
+  border-radius: 13px
+  display: grid
+  place-items: center
+  color: #fff
+  font-weight: 800
+  font-size: 17px
+  letter-spacing: -0.02em
+  background: linear-gradient(150deg, var(--acc) 0%, var(--acc-strong) 100%)
+  box-shadow: 0 8px 18px -6px var(--acc-ring)
+
+.title
+  margin: 18px 0 4px
+  font-size: 22px
+  font-weight: 800
+  letter-spacing: -0.02em
+  color: var(--ink)
+
+.sub
+  margin: 0 0 22px
+  font-size: 13.5px
+  color: var(--ink-muted)
+
+.form
+  display: flex
+  flex-direction: column
+
+.field
+  display: flex
+  flex-direction: column
+  gap: 6px
+  margin-bottom: 14px
+
+.label
+  font-size: 11px
+  font-weight: 700
+  letter-spacing: 0.05em
+  text-transform: uppercase
+  color: var(--ink-muted)
+
+.control
+  position: relative
+  display: flex
+  align-items: center
+
+  svg
+    position: absolute
+    left: 12px
+    width: 17px
+    height: 17px
+    color: var(--ink-faint)
+    pointer-events: none
+
+.input
+  width: 100%
+  height: 44px
+  padding: 0 14px 0 38px
+  font: inherit
+  font-size: 14px
+  color: var(--ink)
+  background: var(--field-bg)
+  border: 1px solid var(--line-strong)
+  border-radius: var(--radius-md)
+  outline: none
+  transition: border-color 0.16s var(--ease), box-shadow 0.16s var(--ease)
+
+  &::placeholder
+    color: var(--ink-faint)
+
+  &:hover
+    border-color: #bfbbb0
+
+  &:focus
+    border-color: var(--acc)
+    box-shadow: 0 0 0 4px var(--acc-ring)
+
+.error
+  display: flex
+  align-items: center
+  gap: 8px
+  margin: 0 0 14px
+  padding: 9px 12px
+  font-size: 12.5px
+  font-weight: 600
+  color: var(--danger)
+  background: var(--danger-bg)
+  border: 1px solid var(--danger-line)
+  border-radius: 9px
+
+  svg
+    width: 16px
+    height: 16px
+    flex: none
+
+.button
+  margin-top: 6px
+  width: 100%
+  height: 46px
+  font: inherit
+  font-size: 14.5px
+  font-weight: 700
+  color: #fff
+  background: var(--acc)
+  border: 0
+  border-radius: 11px
+  cursor: pointer
+  box-shadow: 0 10px 22px -10px var(--acc-ring)
+  transition: background 0.16s var(--ease), transform 0.08s var(--ease)
+
+  &:hover
+    background: var(--acc-strong)
+
+  &:active
+    transform: translateY(1px)
+
+  &:focus-visible
+    outline: 2px solid var(--acc-strong)
+    outline-offset: 2px

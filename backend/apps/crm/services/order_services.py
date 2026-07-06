@@ -1,8 +1,10 @@
+from core.exceptions.orders_exceptions import OrderNotFound, OrderPermissionDenied
+from django.db import transaction
+
 from apps.crm.models.choices_models import StatusChoices
 from apps.crm.models.orders_model import OrdersModel
-from django.db import transaction
+from apps.crm.normalizers import normalize_order_choices
 from apps.crm.selectors.order_selectors import OrderSelector
-from core.exceptions.orders_exceptions import OrderNotFound, OrderPermissionDenied
 
 
 class OrderService:
@@ -18,6 +20,7 @@ class OrderService:
 
     @transaction.atomic
     def update(self, order_id: int, data: dict) -> OrdersModel:
+        data = normalize_order_choices(data)
         order = self.order_selector.get_by_id(pk=order_id)
 
         if not order:

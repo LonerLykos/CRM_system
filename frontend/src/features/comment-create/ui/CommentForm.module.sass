@@ -1,0 +1,48 @@
+.form
+  display: flex
+  gap: 6px
+  align-items: stretch
+
+.input
+  flex: 1 1 auto
+  min-width: 0
+  height: 34px
+  padding: 0 10px
+  font-size: 0.85rem
+  color: var(--ink)
+  background: var(--surface)
+  border: 1px solid var(--line-strong)
+  border-radius: 6px
+  outline: none
+  transition: border-color 0.15s ease, box-shadow 0.15s ease
+
+  &::placeholder
+    color: var(--ink-faint)
+
+  &:focus
+    border-color: var(--acc)
+    box-shadow: 0 0 0 2px var(--acc-ring)
+
+  &:disabled
+    background: var(--surface-2)
+    cursor: not-allowed
+
+.button
+  flex: 0 0 auto
+  height: 34px
+  padding: 0 14px
+  font-size: 0.8rem
+  font-weight: 600
+  color: #ffffff
+  background: var(--acc)
+  border: none
+  border-radius: 6px
+  cursor: pointer
+  transition: background 0.15s ease
+
+  &:hover:not(:disabled)
+    background: var(--acc-strong)
+
+  &:disabled
+    background: #cbd5e1
+    cursor: not-allowed

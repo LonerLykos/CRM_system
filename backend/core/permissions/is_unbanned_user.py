@@ -5,4 +5,4 @@ class IsUnbannedUser(BasePermission):
     message = 'Your account is banned.'
 
     def has_permission(self, request, view):
-        return request.user and not request.user.is_banned
+        return bool(request.user and not getattr(request.user, 'is_banned', True))

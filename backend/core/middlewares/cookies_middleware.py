@@ -1,5 +1,6 @@
 from django.utils.deprecation import MiddlewareMixin
 
+
 class JWTAuthCookieMiddleware(MiddlewareMixin):
 
     def process_request(self, request):

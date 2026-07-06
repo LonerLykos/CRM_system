@@ -1,0 +1,838 @@
+{
+  "info": {
+    "_postman_id": "crm-system-collection-v1",
+    "name": "CRM_system",
+    "description": "REST API колекція для CRM-системи обробки заявок на курси.\n\n**Автентифікація:** JWT через httpOnly cookie. Після успішного `POST /auth` браузер/Postman автоматично зберігає cookies `access_token` і `refresh_token`. Усі наступні запити використовують ці cookies.\n\nАльтернативно можна передати заголовок `Authorization: Bearer <access_token>` вручну.\n\n**Змінні — внутрішні (collection-scoped):** усі змінні (`base_url`, креденшали, `order_id`, `user_id`, `group_name`, `task_id`, `set_password_token`) оголошені в самій колекції (вкладка Variables). Зовнішній environment не обов'язковий — його можна підключити лише щоб перевизначити `base_url` під інший хост.\n\n**Авто-捕capture:** `Export Orders` (async-гілка) зберігає `task_id` у змінну колекції; `Create User` / `Restore Password` зберігають `verify_token` у `set_password_token` — далі `Export Status`/`Set Password` підхоплюють їх автоматично.\n\n**Базова URL:** `{{base_url}}` (за замовчуванням `http://localhost:8000`).\n\n**APPEND_SLASH:** бекенд налаштований із `APPEND_SLASH=False` — URL без кінцевого слешу.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string",
+      "description": "Базова URL бекенду. Змініть порт відповідно до BACKEND_PORT у вашому .env."
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@gmail.com",
+      "type": "string",
+      "description": "Email дефолтного адміна (команда create_default_admin)."
+    },
+    {
+      "key": "admin_password",
+      "value": "admin",
+      "type": "string",
+      "description": "Пароль дефолтного адміна."
+    },
+    {
+      "key": "new_manager_email",
+      "value": "manager@example.com",
+      "type": "string",
+      "description": "Email для запиту Create User."
+    },
+    {
+      "key": "order_id",
+      "value": "1",
+      "type": "string",
+      "description": "ID заявки для detail/update/comment-запитів."
+    },
+    {
+      "key": "user_id",
+      "value": "1",
+      "type": "string",
+      "description": "ID менеджера для detail/toggle/statistic-запитів."
+    },
+    {
+      "key": "group_name",
+      "value": "group-2024-01",
+      "type": "string",
+      "description": "Назва групи для Create Group (нормалізується .strip().lower())."
+    },
+    {
+      "key": "task_id",
+      "value": "",
+      "type": "string",
+      "description": "ID Celery-задачі експорту. Заповнюється автоматично з відповіді 202 запиту Export Orders."
+    },
+    {
+      "key": "set_password_token",
+      "value": "",
+      "type": "string",
+      "description": "Одноразовий PasswordToken. Заповнюється автоматично з verify_token у відповідях Create User / Restore Password."
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Ендпоінти автентифікації. JWT передається через httpOnly cookie (access_token / refresh_token). Middleware бекенду автоматично читає cookie і кладе у Authorization-заголовок.",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth",
+              "host": ["{{base_url}}"],
+              "path": ["auth"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Логін за email і паролем. Повертає access_token і refresh_token у тілі відповіді та встановлює однойменні httpOnly cookies."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Оновлення access-токена. refresh_token береться з httpOnly cookie (тіло не потрібне). При ротації токенів (ROTATE_REFRESH_TOKENS=True) повертає нову пару токенів і оновлює cookies."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Вихід із системи. Заносить refresh-токен (із cookie) у blacklist і видаляє cookies access_token/refresh_token. Тіло не потрібне."
+          },
+          "response": []
+        },
+        {
+          "name": "Current User (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Повертає дані поточного авторизованого користувача."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "description": "Ендпоінти для роботи із заявками на курси. Усі ендпоінти вимагають автентифікації.",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders?page=1&size=25",
+              "host": ["{{base_url}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Номер сторінки (за замовчуванням 1)"
+                },
+                {
+                  "key": "size",
+                  "value": "25",
+                  "description": "Розмір сторінки (max 100, за замовчуванням 25)"
+                },
+                {
+                  "key": "order",
+                  "value": "-id",
+                  "description": "Сортування: prefix '-' для DESC. Доступні поля: id, name, surname, email, phone, age, course, course_format, course_type, sum, already_paid, created_at, status, group, manager",
+                  "disabled": true
+                },
+                {
+                  "key": "name_contains",
+                  "value": "",
+                  "description": "Пошук по імені (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "surname_contains",
+                  "value": "",
+                  "description": "Пошук по прізвищу (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "email_contains",
+                  "value": "",
+                  "description": "Пошук по email (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "phone_contains",
+                  "value": "",
+                  "description": "Пошук по телефону (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "age_eq",
+                  "value": "",
+                  "description": "Фільтр по точному віку",
+                  "disabled": true
+                },
+                {
+                  "key": "sum_eq",
+                  "value": "",
+                  "description": "Фільтр по точній сумі",
+                  "disabled": true
+                },
+                {
+                  "key": "already_paid_eq",
+                  "value": "",
+                  "description": "Фільтр по вже сплаченій сумі",
+                  "disabled": true
+                },
+                {
+                  "key": "course",
+                  "value": "",
+                  "description": "Курс: FS | QACX | JCX | JSCX | FE | PCX",
+                  "disabled": true
+                },
+                {
+                  "key": "course_type",
+                  "value": "",
+                  "description": "Тип курсу: pro | minimal | premium | incubator | vip",
+                  "disabled": true
+                },
+                {
+                  "key": "course_format",
+                  "value": "",
+                  "description": "Формат курсу: static | online",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Статус: new | in_work | agree | disagree | dubbing",
+                  "disabled": true
+                },
+                {
+                  "key": "group",
+                  "value": "",
+                  "description": "Фільтр по ID групи (ModelChoiceFilter)",
+                  "disabled": true
+                },
+                {
+                  "key": "group_name_contains",
+                  "value": "",
+                  "description": "Пошук по назві групи (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "created_at_gte",
+                  "value": "",
+                  "description": "Дата створення від (ISO 8601)",
+                  "disabled": true
+                },
+                {
+                  "key": "created_at_lte",
+                  "value": "",
+                  "description": "Дата створення до (ISO 8601)",
+                  "disabled": true
+                },
+                {
+                  "key": "my",
+                  "value": "true",
+                  "description": "Тільки заявки поточного менеджера",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Список заявок із фільтрацією, пагінацією (25/сторінку) та сортуванням.\n\nВідповідь: `{total_items, total_pages, prev, next, data: [...]}`"
+          },
+          "response": []
+        },
+        {
+          "name": "Export Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Async-гілка (count > EXPORT_SYNC_MAX_ROWS) повертає 202 {task_id} —",
+                  "// зберігаємо його у змінну колекції для Export Status / Export Download.",
+                  "if (pm.response.code === 202) {",
+                  "    const json = pm.response.json();",
+                  "    if (json.task_id) {",
+                  "        pm.collectionVariables.set('task_id', json.task_id);",
+                  "        console.log('Saved task_id =', json.task_id);",
+                  "    }",
+                  "} else if (pm.response.code === 200) {",
+                  "    console.log('Sync-гілка: xlsx повернуто напряму (count <= EXPORT_SYNC_MAX_ROWS).');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/export",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "export"],
+              "query": [
+                {
+                  "key": "course",
+                  "value": "",
+                  "description": "Курс: FS | QACX | JCX | JSCX | FE | PCX",
+                  "disabled": true
+                },
+                {
+                  "key": "course_type",
+                  "value": "",
+                  "description": "Тип курсу: pro | minimal | premium | incubator | vip",
+                  "disabled": true
+                },
+                {
+                  "key": "course_format",
+                  "value": "",
+                  "description": "Формат курсу: static | online",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Статус: new | in_work | agree | disagree | dubbing",
+                  "disabled": true
+                },
+                {
+                  "key": "name_contains",
+                  "value": "",
+                  "description": "Пошук по імені (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "surname_contains",
+                  "value": "",
+                  "description": "Пошук по прізвищу (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "email_contains",
+                  "value": "",
+                  "description": "Пошук по email (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "phone_contains",
+                  "value": "",
+                  "description": "Пошук по телефону (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "age_eq",
+                  "value": "",
+                  "description": "Фільтр по точному віку",
+                  "disabled": true
+                },
+                {
+                  "key": "sum_eq",
+                  "value": "",
+                  "description": "Фільтр по точній сумі",
+                  "disabled": true
+                },
+                {
+                  "key": "already_paid_eq",
+                  "value": "",
+                  "description": "Фільтр по вже сплаченій сумі",
+                  "disabled": true
+                },
+                {
+                  "key": "group",
+                  "value": "",
+                  "description": "Фільтр по ID групи",
+                  "disabled": true
+                },
+                {
+                  "key": "group_name_contains",
+                  "value": "",
+                  "description": "Пошук по назві групи (icontains)",
+                  "disabled": true
+                },
+                {
+                  "key": "created_at_gte",
+                  "value": "",
+                  "description": "Дата створення від (ISO 8601)",
+                  "disabled": true
+                },
+                {
+                  "key": "created_at_lte",
+                  "value": "",
+                  "description": "Дата створення до (ISO 8601)",
+                  "disabled": true
+                },
+                {
+                  "key": "my",
+                  "value": "true",
+                  "description": "Тільки заявки поточного менеджера",
+                  "disabled": true
+                },
+                {
+                  "key": "order",
+                  "value": "-id",
+                  "description": "Сортування (prefix '-' для DESC)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Експорт відфільтрованих заявок у Excel. Приймає ті самі query-параметри, що й `GET /orders` (OrderFilter), без пагінації.\n\n- `count <= EXPORT_SYNC_MAX_ROWS` (1000) → **200** + файл `.xlsx` напряму (синхронно).\n- `count > EXPORT_SYNC_MAX_ROWS` → **202** `{task_id}`, задача йде в Celery. Далі опитуйте `Export Status`, потім `Export Download`.\n\nТест-скрипт запиту автоматично зберігає `task_id` у змінну колекції."
+          },
+          "response": []
+        },
+        {
+          "name": "Export Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/export/{{task_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "export", "{{task_id}}"]
+            },
+            "description": "Статус/прогрес async-задачі експорту. Стани: PENDING, PROGRESS (`{processed, total}`), SUCCESS (`ready=true`, `download_name`), FAILURE (`error`).\n\n`{{task_id}}` підставляється автоматично з відповіді `Export Orders` (202)."
+          },
+          "response": []
+        },
+        {
+          "name": "Export Download",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/export/{{task_id}}/download",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "export", "{{task_id}}", "download"]
+            },
+            "description": "Завантаження готового `.xlsx` async-експорту. `409` — задача ще не завершена; `404` — файл протух (TTL) або задача впала."
+          },
+          "response": []
+        },
+        {
+          "name": "List Groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/groups",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "groups"]
+            },
+            "description": "Список усіх груп заявок."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/groups/create",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "groups", "create"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{group_name}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Створити нову групу. Назва нормалізується: `.strip().lower()`. Якщо група з такою назвою вже існує — повертається наявна (get_or_create)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Choices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/choices",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "choices"]
+            },
+            "description": "Довідники enum-значень для полів заявки: course, course_type, course_format, status."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}"]
+            },
+            "description": "Деталі конкретної заявки, включаючи коментарі."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/update",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "update"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Іван\",\n  \"surname\": \"Петренко\",\n  \"status\": \"in_work\",\n  \"course\": \"FS\",\n  \"course_format\": \"online\",\n  \"course_type\": \"pro\",\n  \"age\": 25,\n  \"sum\": 1500.00,\n  \"already_paid\": 500.00,\n  \"group\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Часткове оновлення заявки (PATCH). Усі поля необов'язкові.\n\nРедаговані поля: name, surname, email, phone, age, course, course_format, course_type, status, sum, already_paid, group.\n\nПравила:\n- Якщо заявка вже має менеджера і він відрізняється від поточного — `403 OrderPermissionDenied`.\n- Якщо `status=new` — менеджер знімається з заявки.\n- Якщо менеджера немає і статус не передано або поточний `new` — автоматично ставиться `in_work` і призначається поточний менеджер."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/comment",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "comment"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Клієнт передзвонить завтра\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Додати коментар до заявки. Якщо заявка без менеджера — поточний користувач стає менеджером. Якщо статус порожній або 'new' — автоматично ставиться 'in_work'."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Ендпоінти керування менеджерами. Більшість потребує прав адміна (is_staff=True).",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "25",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Список менеджерів із пагінацією. Сортування: нові зверху (ordering=[-id])."
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Зберігаємо verify_token у змінну колекції для запиту Set Password.",
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    if (json.verify_token) {",
+                  "        pm.collectionVariables.set('set_password_token', json.verify_token);",
+                  "        console.log('Saved set_password_token from Create User');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/create_user",
+              "host": ["{{base_url}}"],
+              "path": ["users", "create_user"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{new_manager_email}}\",\n  \"name\": \"Олег\",\n  \"surname\": \"Коваленко\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Створити нового менеджера. Потребує прав адміна. Пароль не задається одразу — система генерує одноразовий токен для встановлення пароля і повертає посилання активації.\n\nВідповідь (201): `{details, link, verify_token}`. Тест-скрипт зберігає `verify_token` у змінну `set_password_token`."
+          },
+          "response": []
+        },
+        {
+          "name": "Global Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/statistic",
+              "host": ["{{base_url}}"],
+              "path": ["users", "statistic"]
+            },
+            "description": "Глобальна статистика заявок по всіх менеджерах, згрупована за статусом. Admin-only.\n\nВідповідь: `{total, new, in_work, agree, disagree, dubbing}`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            },
+            "description": "Деталі конкретного менеджера."
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Active",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/active_toggle",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "active_toggle"]
+            },
+            "description": "Перемкнути прапорець is_active менеджера (активний / неактивний). Тіло не потрібне. Потребує прав адміна."
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Ban",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/ban_toggle",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "ban_toggle"]
+            },
+            "description": "Перемкнути прапорець is_banned менеджера (заблоковано / розблоковано). Тіло не потрібне. Потребує прав адміна."
+          },
+          "response": []
+        },
+        {
+          "name": "Restore Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Зберігаємо verify_token у змінну колекції для запиту Set Password.",
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    if (json.verify_token) {",
+                  "        pm.collectionVariables.set('set_password_token', json.verify_token);",
+                  "        console.log('Saved set_password_token from Restore Password');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/restore_password",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "restore_password"]
+            },
+            "description": "Скинути пароль менеджера: встановлює unusable password і генерує новий одноразовий PasswordToken для відновлення. Тіло не потрібне. Потребує прав адміна.\n\nВідповідь (200): `{details, link, verify_token}`. Тест-скрипт зберігає `verify_token` у змінну `set_password_token`."
+          },
+          "response": []
+        },
+        {
+          "name": "Manager Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/statistic",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "statistic"]
+            },
+            "description": "Статистика заявок по конкретному менеджеру (`{{user_id}}`), згрупована за статусом. Admin-only.\n\nВідповідь: `{total, new, in_work, agree, disagree, dubbing}`."
+          },
+          "response": []
+        },
+        {
+          "name": "Set Password (by token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/set_password/{{set_password_token}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "set_password", "{{set_password_token}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"MySecurePassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Встановити пароль за одноразовим токеном (з посилання активації або відновлення). Публічний ендпоінт (AllowAny). Токен одноразовий — після використання заноситься у blacklist. Після успіху встановлює is_active=True і повертає auth cookies.\n\n`{{set_password_token}}` підставляється автоматично з відповіді Create User / Restore Password."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "description": "Системні / службові ендпоінти (без автентифікації).",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Перевірка живучості: виконує `SELECT 1`. `200` — БД доступна; `503` — недоступна. AllowAny."
+          },
+          "response": []
+        },
+        {
+          "name": "OpenAPI Schema",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/schema",
+              "host": ["{{base_url}}"],
+              "path": ["api", "schema"]
+            },
+            "description": "OpenAPI 3 схема (drf-spectacular) у форматі YAML."
+          },
+          "response": []
+        },
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/docs",
+              "host": ["{{base_url}}"],
+              "path": ["api", "docs"]
+            },
+            "description": "Інтерактивна документація Swagger UI (HTML)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

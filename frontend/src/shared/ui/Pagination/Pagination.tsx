@@ -1,5 +1,3 @@
-'use server'
-
 import Link from 'next/link';
 import s from './Pagination.module.sass';
 import {IPaginatedResponse} from "@/shared/api";

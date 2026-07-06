@@ -1,0 +1,141 @@
+.openBtn
+  padding: 8px 20px
+  background-color: var(--acc)
+  color: #fff
+  border: none
+  border-radius: 6px
+  font-size: 0.9rem
+  font-weight: 600
+  cursor: pointer
+  transition: background 0.2s
+  &:hover
+    background-color: var(--acc-strong)
+
+.overlay
+  position: fixed
+  inset: 0
+  background: rgba(17, 24, 39, 0.55)
+  display: flex
+  align-items: center
+  justify-content: center
+  z-index: 1000
+
+.modal
+  position: relative
+  background: var(--surface)
+  border-radius: 10px
+  padding: 32px 28px
+  width: 380px
+  max-width: 95vw
+  box-shadow: var(--shadow-lg)
+
+.closeBtn
+  position: absolute
+  top: 12px
+  right: 14px
+  background: none
+  border: none
+  font-size: 1.1rem
+  cursor: pointer
+  color: var(--ink-muted)
+
+.title
+  margin: 0 0 20px
+  font-size: 1.2rem
+  font-weight: 700
+  color: var(--ink)
+
+.form
+  display: flex
+  flex-direction: column
+  gap: 14px
+
+.label
+  display: flex
+  flex-direction: column
+  gap: 4px
+  font-size: 0.85rem
+  font-weight: 600
+  color: #444
+
+.input
+  padding: 8px 10px
+  border: 1px solid var(--line-strong)
+  border-radius: 6px
+  font-size: 0.95rem
+  color: var(--ink)
+  outline: none
+  transition: border-color 0.2s, box-shadow 0.2s
+  &:focus
+    border-color: var(--acc)
+    box-shadow: 0 0 0 3px var(--acc-ring)
+
+.error
+  color: var(--danger)
+  font-size: 0.85rem
+  margin: 0
+
+.submitBtn
+  margin-top: 4px
+  padding: 10px
+  background-color: var(--acc)
+  color: #fff
+  border: none
+  border-radius: 6px
+  font-size: 0.95rem
+  font-weight: 600
+  cursor: pointer
+  transition: background 0.2s
+  &:hover:not(:disabled)
+    background-color: var(--acc-strong)
+  &:disabled
+    opacity: 0.6
+    cursor: not-allowed
+
+.success
+  display: flex
+  flex-direction: column
+  gap: 10px
+
+.details
+  font-weight: 600
+  color: var(--ink)
+
+.linkLabel
+  font-size: 0.85rem
+  color: var(--ink-muted)
+  margin: 0
+
+.linkText
+  font-size: 0.78rem
+  color: var(--info)
+  word-break: break-all
+  background: var(--surface-2)
+  padding: 6px 8px
+  border-radius: 4px
+
+.copyBtn
+  padding: 8px 16px
+  background-color: var(--info)
+  color: #fff
+  border: none
+  border-radius: 6px
+  font-size: 0.9rem
+  font-weight: 600
+  cursor: pointer
+  transition: background 0.2s
+  &:hover
+    background-color: var(--info-strong)
+
+.doneBtn
+  padding: 8px 16px
+  background-color: var(--acc)
+  color: #fff
+  border: none
+  border-radius: 6px
+  font-size: 0.9rem
+  font-weight: 600
+  cursor: pointer
+  transition: background 0.15s ease
+  &:hover
+    background-color: var(--acc-strong)

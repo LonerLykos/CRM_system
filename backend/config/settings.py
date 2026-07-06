@@ -11,12 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+
 from .extra_conf import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-print("MYSQL_HOST raw:", os.environ.get("MYSQL_HOST"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -25,7 +24,7 @@ print("MYSQL_HOST raw:", os.environ.get("MYSQL_HOST"))
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG')
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('1', 'true', 'yes', 'on')
 
 ALLOWED_HOSTS = ['crm', 'localhost', '127.0.0.1']
 AUTH_USER_MODEL = 'users.UserModel'
@@ -39,6 +38,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_spectacular',
 
     # my_apps
     'core',
@@ -46,6 +46,15 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.auth',
 ]
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'CRM API',
+    'DESCRIPTION': 'REST API для CRM-системи обробки заявок на курси. '
+                   'Автентифікація через JWT (httpOnly cookie access_token / refresh_token). '
+                   'Усі захищені ендпоінти вимагають дійсного access-токена.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -120,6 +129,15 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Media
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Orders export
+EXPORTS_DIR = MEDIA_ROOT / 'exports'
+EXPORTS_TTL_SECONDS = 3600  
+EXPORT_SYNC_MAX_ROWS = 1000
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -129,4 +147,5 @@ APPEND_SLASH = False
 FRONTEND_URL = os.environ.get('NEXT_PUBLIC_FRONTEND_URL')
 
 from config.extra_conf.logging_conf import setup_logging
+
 setup_logging()

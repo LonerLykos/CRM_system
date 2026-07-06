@@ -1,9 +1,19 @@
 import {zod} from "@/shared/libs";
-import {isValidPhoneNumber} from "libphonenumber-js";
+import {parsePhoneNumberFromString} from "libphonenumber-js";
 
 const emptyToNull = (val: unknown) => (
     typeof val === "string" && val.trim() === "" ? null : val
 );
+
+// Parse a phone that may be UA-national (leading 0), international with a "+",
+// or international with the "+" omitted (bare country code). The "+" is optional
+// on input ("+380…" and "380…" are both accepted); expects an already-cleaned
+// (no spaces/separators) string.
+const parsePhone = (val: string) => {
+    if (!val) return undefined;
+    if (val.startsWith('0')) return parsePhoneNumberFromString(val, 'UA');
+    return parsePhoneNumberFromString(val.startsWith('+') ? val : `+${val}`);
+};
 
 
 export const orderUpdateSchema = zod.object({
@@ -35,9 +45,14 @@ export const orderUpdateSchema = zod.object({
     phone: zod.preprocess(
         emptyToNull,
         zod.string()
-            .refine((val) => !val || isValidPhoneNumber(val), {
+            // Accept UA national (0991122345) or international, with or without a
+            // leading "+" ("+380…" and "380…"); strip spaces & separators and
+            // store one canonical E.164 form.
+            .transform((val) => val.replace(/[\s()\-]/g, ''))
+            .refine((val) => parsePhone(val)?.isValid() ?? false, {
                 error: 'Invalid phone format'
             })
+            .transform((val) => parsePhone(val)!.number)
             .nullish()
     ),
     age: zod.preprocess(
@@ -50,15 +65,15 @@ export const orderUpdateSchema = zod.object({
     ),
     course: zod.preprocess(
         emptyToNull,
-        zod.string().nullish(),
+        zod.string().transform((v) => v.toUpperCase()).nullish(),
     ),
     course_format: zod.preprocess(
         emptyToNull,
-        zod.string().nullish(),
+        zod.string().transform((v) => v.toLowerCase()).nullish(),
     ),
     course_type: zod.preprocess(
         emptyToNull,
-        zod.string().nullish(),
+        zod.string().transform((v) => v.toLowerCase()).nullish(),
     ),
     sum: zod.preprocess(
         emptyToNull,
@@ -74,7 +89,7 @@ export const orderUpdateSchema = zod.object({
     ),
     status: zod.preprocess(
         emptyToNull,
-        zod.string().nullish(),
+        zod.string().transform((v) => v.toLowerCase()).nullish(),
     ),
     group: zod.preprocess(
         emptyToNull,

@@ -1,17 +1,49 @@
 .mainMenu
-  background-color: #7fffd9
-  height: 50px
-  padding: 3px
+  background-color: var(--surface)
+  height: 52px
+  padding: 0 14px
   margin: 0
-  border-radius: 2px
-  border: 2px solid #000000
+  border-bottom: 1px solid var(--line)
+  box-shadow: var(--shadow-sm)
 
 .navigate
   display: grid
-  grid-template-columns: 50px 1fr
-  gap: 10%
+  grid-template-columns: auto auto 1fr
+  align-items: center
+  gap: 14px
+  height: 100%
+
+.logoBlock
+  display: flex
+  align-items: center
+
+.userBlock
+  display: flex
+  align-items: center
+  gap: 8px
+
+.userName
+  font-size: 14px
+  font-weight: 600
+  color: var(--ink)
+  white-space: nowrap
 
 .navigateBox
   display: flex
-  justify-content: space-around
+  justify-content: flex-end
   align-items: center
+  gap: 4px
+
+  // Nav actions: <Link> (Work / Admin) render <a>, LogoutButton renders <form>.
+  // Give both the same padded, hover-tinted target — no markup change needed.
+  a, form
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    padding: 6px
+    border-radius: 9px
+    cursor: pointer
+    transition: background 0.15s var(--ease)
+
+    &:hover
+      background: var(--acc-tint)

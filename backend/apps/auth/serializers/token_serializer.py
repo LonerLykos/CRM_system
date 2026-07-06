@@ -1,6 +1,8 @@
 import structlog
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework import serializers
+
+from apps.users.models import UserModel
 
 log = structlog.get_logger()
 
@@ -8,6 +10,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         user = self.user
+
+        if not isinstance(user, UserModel):
+            raise AuthenticationFailed("Invalid credentials or account inactive.")
 
         reason = None
         if user.is_banned:
@@ -23,6 +28,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 email=user.email,
                 reason=reason
             )
-            raise serializers.AuthenticationFailed("Invalid credentials or account inactive.")
+            raise AuthenticationFailed("Invalid credentials or account inactive.")
 
         return data

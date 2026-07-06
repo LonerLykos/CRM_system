@@ -14,11 +14,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, include
-
+from core.views import HealthCheckView
+from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
+    path('health', HealthCheckView.as_view(), name='health'),
+
     path('auth', include('apps.auth.api.urls')),
     path('orders', include('apps.crm.api.urls')),
     path('users', include('apps.users.api.urls')),
+
+    path('api/schema', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]

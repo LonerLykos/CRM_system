@@ -4,3 +4,7 @@ class UserNotFound(Exception):
 
 class UserPermissionDenied(Exception):
     pass
+
+
+class SelfActionDenied(Exception):
+    pass

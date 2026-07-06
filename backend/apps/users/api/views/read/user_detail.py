@@ -1,10 +1,11 @@
-from rest_framework.generics import RetrieveAPIView
-from rest_framework.permissions import IsAdminUser
-from apps.users.selectors.users_selectors import UsersSelector
-from apps.users.serializers.serializers import UserResponseSerializer
 from core.exceptions.users_exceptions import UserNotFound
 from core.permissions.is_active_user import IsActiveUser
 from core.permissions.is_unbanned_user import IsUnbannedUser
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.permissions import IsAdminUser
+
+from apps.users.selectors.users_selectors import UsersSelector
+from apps.users.serializers.serializers import UserResponseSerializer
 
 
 class UserDetailsView(RetrieveAPIView):

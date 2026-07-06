@@ -1,0 +1,48 @@
+.add_group
+  display: flex
+  flex-wrap: wrap
+  gap: 6px
+  align-items: center
+  width: 100%
+
+.add_group__input
+  flex: 1
+  min-width: 0
+  padding: 6px 8px
+  border: 1px solid var(--line-strong)
+  border-radius: 4px
+  font-size: 0.85rem
+  background: var(--field-bg)
+  color: var(--ink)
+  outline: none
+  transition: border-color 0.15s ease, box-shadow 0.15s ease
+
+  &:focus
+    border-color: var(--acc)
+    box-shadow: 0 0 0 2px var(--acc-ring)
+
+  &:disabled
+    opacity: 0.6
+
+.add_group__btn
+  padding: 6px 10px
+  background-color: var(--acc)
+  color: #fff
+  border: none
+  border-radius: 4px
+  font-size: 0.8rem
+  cursor: pointer
+  white-space: nowrap
+  transition: background 0.15s ease
+
+  &:hover:not(:disabled)
+    background-color: var(--acc-strong)
+
+  &:disabled
+    opacity: 0.6
+    cursor: not-allowed
+
+.add_group__error
+  width: 100%
+  font-size: 0.75rem
+  color: var(--danger)
