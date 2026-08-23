@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from apps.users.models import UserModel
 
@@ -20,6 +21,15 @@ class UserBaseSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(UserBaseSerializer):
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=UserModel.objects.all(),
+                message='User with this email already exists',
+            ),
+        ],
+    )
+
     def create(self, validated_data):
         return UserModel.objects.create_user(**validated_data)
 

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import s from './Pagination.module.sass';
 import {IPaginatedResponse} from "@/shared/api";
-import {getDynamicSlots} from "@/shared/libs";
+import {getDynamicSlots, rebuildParams} from "@/shared/libs";
 import {ISearchParams} from "@/shared/model";
 
 
@@ -18,10 +18,13 @@ export const Pagination = async ({ currentPage, baseUrl, paginationInfo, current
 
     const slots = getDynamicSlots(total_pages, currentPage, max_slots);
 
+    const pageHref = (page: number | string) =>
+        `${baseUrl}?${rebuildParams(currentParams ?? {}, {page: String(page)})}`;
+
     return (
         <nav className={s.pagination}>
             <div className={`${s.navSlot} ${!prev ? s.invisible : ''}`}>
-                <Link href={`${baseUrl}?page=${currentPage - 1}`} className={s.navBtn}>&lt;</Link>
+                <Link href={pageHref(currentPage - 1)} className={s.navBtn}>&lt;</Link>
             </div>
 
             <div className={s.pagesGrid}>
@@ -31,7 +34,7 @@ export const Pagination = async ({ currentPage, baseUrl, paginationInfo, current
                             <span className={s.dots}>...</span>
                         ) : (
                             <Link
-                                href={`${baseUrl}?page=${page}`}
+                                href={pageHref(page)}
                                 className={`${s.btn} ${page === currentPage ? s.active : ''}`}
                             >
                                 {page}
@@ -42,7 +45,7 @@ export const Pagination = async ({ currentPage, baseUrl, paginationInfo, current
             </div>
 
             <div className={`${s.navSlot} ${!next ? s.invisible : ''}`}>
-                <Link href={`${baseUrl}?page=${currentPage + 1}`} className={s.navBtn}>&gt;</Link>
+                <Link href={pageHref(currentPage + 1)} className={s.navBtn}>&gt;</Link>
             </div>
         </nav>
     );

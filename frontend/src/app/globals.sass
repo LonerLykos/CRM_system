@@ -6,6 +6,8 @@
 //  without an @use import. Accent: Teal (variant A).
 // ============================================================
 \:root
+  color-scheme: light
+
   // ----- brand accent (teal) -----
   --acc: #14b8a6
   --acc-strong: #0d9488
@@ -49,6 +51,22 @@
   --info: #0070f3
   --info-strong: #005bb5
 
+  --acc-fill: #0f766e
+  --acc-fill-hover: #115e59
+  --info-fill: #0070f3
+  --info-fill-hover: #005bb5
+  --danger-fill: #dc2626
+  --danger-fill-hover: #b91c1c
+  --warning-fill: #c2410c
+  --warning-fill-hover: #9a3412
+  --on-fill: #ffffff
+
+  --disabled-bg: #e5e7eb
+  --disabled-ink: #9ca3af
+
+  --line-hover: #b9b4a9
+  --acc-line: #b7e9e2
+
   // ----- table zebra (чітко розрізнювана, гармонізована під палітру) -----
   --row-even: #ffffff
   --row-odd: #edeae2
@@ -85,6 +103,8 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible
 //  by default; a manual [data-theme] on <html> overrides it both ways.
 // ============================================================
 =dark-tokens
+  color-scheme: dark
+
   --acc: #2dd4bf
   --acc-strong: #14b8a6
   --acc-ink: #5eead4
@@ -110,6 +130,21 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible
   --warning-strong: #f97316
   --info: #60a5fa
   --info-strong: #3b82f6
+
+  --acc-fill: #145c55
+  --acc-fill-hover: #1a7a71
+  --info-fill: #1d4ed8
+  --info-fill-hover: #1e40af
+  --danger-fill: #b91c1c
+  --danger-fill-hover: #991b1b
+  --warning-fill: #b45309
+  --warning-fill-hover: #92400e
+  --on-fill: #f2f6f8
+
+  --disabled-bg: #2c313b
+  --disabled-ink: #6e7581
+  --line-hover: #4a5260
+  --acc-line: #245049
 
   --row-even: #1c1f26
   --row-odd: #23262e

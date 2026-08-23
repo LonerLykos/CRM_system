@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-// --- Mock the concrete actions module (same technique as AddGroupForm test) ---
+// --- Mock the concrete actions module ---
 // UserManageButtons.tsx imports from '@/features/user-manage' (barrel) which
 // re-exports from './model/userManageActions'. Mocking the barrel via @/ alias
 // does not intercept because Vitest resolves the component's import to the

@@ -1,6 +1,6 @@
 // BDD-style behaviour spec for the OrderFilter client component.
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 // --- Mock next/navigation ---
@@ -11,17 +11,12 @@ vi.mock('next/navigation', () => ({
     useSearchParams: () => new URLSearchParams(),
 }))
 
-// --- Mock use-debounce: pass the callback through synchronously (no delay) ---
-vi.mock('use-debounce', () => ({
-    useDebouncedCallback: (fn: (...args: unknown[]) => unknown) => fn,
-}))
-
 // --- Mock ExportButton (irrelevant to filter behaviour) ---
 vi.mock('@/features/order-export', () => ({
     ExportButton: () => <a href="/api/orders/export">Export Excel</a>,
 }))
 
-import { OrderFilter } from './OrderFilter'
+import { OrderFilter, DEBOUNCE_MS } from './OrderFilter'
 import type { ISearchParams } from '@/shared/model'
 import type { IChoicesResponse, IGroupResponse } from '@/entities/crm'
 
@@ -79,6 +74,11 @@ const getGroupSelect = () =>
         .getAllByRole('combobox')
         .find((el) => within(el).queryByRole('option', { name: 'Alpha' })) as HTMLSelectElement
 
+const waitForRequest = () =>
+    waitFor(() => expect(mockReplace).toHaveBeenCalled(), { timeout: DEBOUNCE_MS + 1500 })
+
+const lastUrl = () => mockReplace.mock.calls.at(-1)![0] as string
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('OrderFilter', () => {
@@ -91,31 +91,28 @@ describe('OrderFilter', () => {
     describe('given an empty filter state', () => {
         it('when the user types in the Name field, then replace is called with name_contains in the query', async () => {
             renderFilter()
-            const nameInput = screen.getByPlaceholderText('Name...')
-            await userEvent.type(nameInput, 'Jo')
+            await userEvent.type(screen.getByPlaceholderText('Name...'), 'Jo')
+            await waitForRequest()
 
-            const lastCall = mockReplace.mock.calls.at(-1)![0] as string
-            expect(lastCall).toContain('name_contains=Jo')
-            expect(lastCall).toContain('page=1')
+            expect(lastUrl()).toContain('name_contains=Jo')
+            expect(lastUrl()).toContain('page=1')
         })
 
         it('when the user types in the Surname field, then replace is called with surname_contains', async () => {
             renderFilter()
-            const input = screen.getByPlaceholderText('Surname...')
-            await userEvent.type(input, 'Doe')
+            await userEvent.type(screen.getByPlaceholderText('Surname...'), 'Doe')
+            await waitForRequest()
 
-            const lastCall = mockReplace.mock.calls.at(-1)![0] as string
-            expect(lastCall).toContain('surname_contains=Doe')
-            expect(lastCall).toContain('page=1')
+            expect(lastUrl()).toContain('surname_contains=Doe')
+            expect(lastUrl()).toContain('page=1')
         })
 
         it('when the user types in the Email field, then replace is called with email_contains', async () => {
             renderFilter()
-            const input = screen.getByPlaceholderText('Email...')
-            await userEvent.type(input, 'test@')
+            await userEvent.type(screen.getByPlaceholderText('Email...'), 'test@')
+            await waitForRequest()
 
-            const lastCall = mockReplace.mock.calls.at(-1)![0] as string
-            expect(lastCall).toContain('email_contains=test')
+            expect(lastUrl()).toContain('email_contains=test')
         })
     })
 
@@ -138,9 +135,8 @@ describe('OrderFilter', () => {
                 .find((el) => within(el).queryByRole('option', { name: 'Dubbing' })) as HTMLSelectElement
             await userEvent.selectOptions(statusSelect, 'in_work')
 
-            const lastCall = mockReplace.mock.calls.at(-1)![0] as string
-            expect(lastCall).toContain('status=in_work')
-            expect(lastCall).toContain('page=1')
+            expect(lastUrl()).toContain('status=in_work')
+            expect(lastUrl()).toContain('page=1')
         })
     })
 
@@ -151,17 +147,15 @@ describe('OrderFilter', () => {
             renderFilter()
             await userEvent.selectOptions(getGroupSelect(), '1')
 
-            const lastCall = mockReplace.mock.calls.at(-1)![0] as string
-            expect(lastCall).toContain('group=1')
-            expect(lastCall).toContain('page=1')
+            expect(lastUrl()).toContain('group=1')
+            expect(lastUrl()).toContain('page=1')
         })
 
         it('when the user selects a different group, then replace is called with the new group id', async () => {
             renderFilter()
             await userEvent.selectOptions(getGroupSelect(), '2')
 
-            const lastCall = mockReplace.mock.calls.at(-1)![0] as string
-            expect(lastCall).toContain('group=2')
+            expect(lastUrl()).toContain('group=2')
         })
     })
 
@@ -170,8 +164,7 @@ describe('OrderFilter', () => {
     describe('given the My checkbox is unchecked', () => {
         it('when the user checks it, then replace is called with my=true', async () => {
             renderFilter()
-            const checkbox = screen.getByRole('checkbox')
-            await userEvent.click(checkbox)
+            await userEvent.click(screen.getByRole('checkbox'))
 
             expect(mockReplace).toHaveBeenCalledTimes(1)
             const url = mockReplace.mock.calls[0][0] as string
@@ -183,8 +176,7 @@ describe('OrderFilter', () => {
     describe('given the My checkbox starts checked (params.my=true)', () => {
         it('when the user unchecks it, then replace is called without the my param', async () => {
             renderFilter({ my: 'true' })
-            const checkbox = screen.getByRole('checkbox')
-            await userEvent.click(checkbox)
+            await userEvent.click(screen.getByRole('checkbox'))
 
             const url = mockReplace.mock.calls[0][0] as string
             expect(url).not.toContain('my=true')
@@ -221,8 +213,7 @@ describe('OrderFilter', () => {
             renderFilter()
             await userEvent.click(screen.getByRole('button', { name: /reset filters/i }))
 
-            const url = mockReplace.mock.calls[0][0] as string
-            expect(url).toContain('page=1')
+            expect(lastUrl()).toContain('page=1')
         })
     })
 
@@ -231,9 +222,8 @@ describe('OrderFilter', () => {
             renderFilter({ orderId: '42', name_contains: 'Alice' })
             await userEvent.click(screen.getByRole('button', { name: /reset filters/i }))
 
-            const url = mockReplace.mock.calls[0][0] as string
-            expect(url).toContain('orderId=42')
-            expect(url).not.toContain('name_contains')
+            expect(lastUrl()).toContain('orderId=42')
+            expect(lastUrl()).not.toContain('name_contains')
         })
     })
 
@@ -242,22 +232,18 @@ describe('OrderFilter', () => {
     describe('given the Created before date filter', () => {
         it('when the user changes the date, then replace is called with created_at_lte', async () => {
             renderFilter()
-            const dateInput = screen.getByTitle('Created before')
-            await userEvent.type(dateInput, '2024-01-15')
+            await userEvent.type(screen.getByTitle('Created before'), '2024-01-15')
 
-            const lastCall = mockReplace.mock.calls.at(-1)![0] as string
-            expect(lastCall).toContain('created_at_lte=')
+            expect(lastUrl()).toContain('created_at_lte=')
         })
     })
 
     describe('given the Created after date filter', () => {
         it('when the user changes the date, then replace is called with created_at_gte', async () => {
             renderFilter()
-            const dateInput = screen.getByTitle('Created after')
-            await userEvent.type(dateInput, '2024-01-01')
+            await userEvent.type(screen.getByTitle('Created after'), '2024-01-01')
 
-            const lastCall = mockReplace.mock.calls.at(-1)![0] as string
-            expect(lastCall).toContain('created_at_gte=')
+            expect(lastUrl()).toContain('created_at_gte=')
         })
     })
 
@@ -268,6 +254,102 @@ describe('OrderFilter', () => {
             renderFilter({ name_contains: 'Alice' })
             const nameInput = screen.getByPlaceholderText('Name...')
             expect((nameInput as HTMLInputElement).defaultValue).toBe('Alice')
+        })
+    })
+})
+
+
+describe('OrderFilter debounce', () => {
+    beforeEach(() => {
+        mockReplace.mockReset()
+        vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+        vi.useRealTimers()
+    })
+
+    const typeInto = (el: HTMLElement, text: string) => {
+        for (let i = 1; i <= text.length; i++) {
+            fireEvent.change(el, { target: { value: text.slice(0, i) } })
+        }
+    }
+
+    const advance = (ms: number) => act(() => {
+        vi.advanceTimersByTime(ms)
+    })
+
+    describe('given the user is typing into a text filter', () => {
+        it('when characters are still arriving, then no request has been made yet', () => {
+            renderFilter()
+            typeInto(screen.getByPlaceholderText('Name...'), 'John')
+
+            expect(mockReplace).not.toHaveBeenCalled()
+        })
+
+        it('when the typing burst ends, then exactly one request covers the whole word', () => {
+            renderFilter()
+            typeInto(screen.getByPlaceholderText('Name...'), 'John')
+            advance(DEBOUNCE_MS)
+
+            expect(mockReplace).toHaveBeenCalledTimes(1)
+            expect(mockReplace.mock.calls[0][0] as string).toContain('name_contains=John')
+        })
+
+        it('when the pause is shorter than the debounce, then the request is postponed again', () => {
+            renderFilter()
+            const nameInput = screen.getByPlaceholderText('Name...')
+
+            typeInto(nameInput, 'Jo')
+            advance(DEBOUNCE_MS - 100)
+            expect(mockReplace).not.toHaveBeenCalled()
+
+            fireEvent.change(nameInput, { target: { value: 'John' } })
+            advance(DEBOUNCE_MS)
+
+            expect(mockReplace).toHaveBeenCalledTimes(1)
+            expect(mockReplace.mock.calls[0][0] as string).toContain('name_contains=John')
+        })
+    })
+
+    describe('given the user edits two text filters inside one debounce window', () => {
+        it('then both values survive into the query string', () => {
+            renderFilter()
+
+            typeInto(screen.getByPlaceholderText('Name...'), 'Jo')
+            typeInto(screen.getByPlaceholderText('Surname...'), 'Doe')
+            advance(DEBOUNCE_MS)
+
+            const url = mockReplace.mock.calls.at(-1)![0] as string
+            expect(url).toContain('name_contains=Jo')
+            expect(url).toContain('surname_contains=Doe')
+        })
+    })
+
+    describe('given a text filter is pending and a select is used', () => {
+        it('then the select applies at once and carries the typed text along', () => {
+            renderFilter()
+
+            typeInto(screen.getByPlaceholderText('Name...'), 'Jo')
+            fireEvent.change(getGroupSelect(), { target: { value: '1' } })
+
+            expect(mockReplace).toHaveBeenCalledTimes(1)
+            const url = mockReplace.mock.calls[0][0] as string
+            expect(url).toContain('group=1')
+            expect(url).toContain('name_contains=Jo')
+        })
+    })
+
+    describe('given an active filter on a later page', () => {
+        it('when the filter text is cleared, then the page resets to 1', () => {
+            renderFilter({ name_contains: 'John', page: '4' })
+
+            fireEvent.change(screen.getByPlaceholderText('Name...'), { target: { value: '' } })
+            advance(DEBOUNCE_MS)
+
+            const url = mockReplace.mock.calls.at(-1)![0] as string
+            expect(url).not.toContain('name_contains')
+            expect(url).toContain('page=1')
         })
     })
 })

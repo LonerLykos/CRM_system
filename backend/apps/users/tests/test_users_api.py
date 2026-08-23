@@ -117,6 +117,27 @@ def test_create_user_manager_forbidden(manager_client):
     assert resp.status_code == 403
 
 
+@pytest.mark.django_db
+def test_create_user_duplicate_email_returns_400(admin_client, target_user):
+    payload = {"email": target_user.email, "name": "Dupe", "surname": "User"}
+    resp = admin_client.post(USERS_CREATE_URL, payload, format="json")
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_user_duplicate_email_message_is_readable(admin_client, target_user):
+    payload = {"email": target_user.email, "name": "Dupe", "surname": "User"}
+    resp = admin_client.post(USERS_CREATE_URL, payload, format="json")
+    assert resp.json()["email"] == ["User with this email already exists"]
+
+
+@pytest.mark.django_db
+def test_create_user_duplicate_email_creates_no_second_row(admin_client, target_user):
+    payload = {"email": target_user.email, "name": "Dupe", "surname": "User"}
+    admin_client.post(USERS_CREATE_URL, payload, format="json")
+    assert User.objects.filter(email=target_user.email).count() == 1
+
+
 # ---------------------------------------------------------------------------
 # GET /users/<pk> — detail
 # ---------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 
   th, td
     font-size: 0.9rem
-    border: 1px solid #ddd
+    border: 1px solid var(--line)
     overflow: hidden
     text-overflow: ellipsis
     white-space: nowrap
@@ -28,8 +28,8 @@
     margin-left: 2px
 
   th
-    background-color: var(--acc)
-    color: #ffffff
+    background-color: var(--acc-fill)
+    color: var(--on-fill)
 
   th:nth-child(1) // ID
        width: 40px
@@ -117,7 +117,7 @@
           margin: 0
           padding: 6px 8px
           font-size: 0.8rem
-          color: #374151
+          color: var(--ink)
           background: var(--surface)
           border: 1px solid var(--line)
           border-radius: 6px
@@ -161,8 +161,8 @@
         width: auto
         height: auto
         padding: 7px 16px
-        background: var(--acc)
-        color: #ffffff
+        background: var(--acc-fill)
+        color: var(--on-fill)
         font-size: 0.8rem
         font-weight: 600
         text-align: center
@@ -170,15 +170,15 @@
         border-radius: 6px
 
         &:hover
-          background: var(--acc-strong)
+          background: var(--acc-fill-hover)
 
         &:visited
-          color: #ffffff
+          color: var(--on-fill)
 
       .editLinkDisabled
-        background: #e5e7eb
-        color: #9ca3af
+        background: var(--disabled-bg)
+        color: var(--disabled-ink)
         cursor: not-allowed
 
         &:hover
-          background: #e5e7eb
+          background: var(--disabled-bg)

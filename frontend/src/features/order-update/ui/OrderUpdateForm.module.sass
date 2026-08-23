@@ -100,8 +100,8 @@
 .submit_btn
   grid-column: 1 / -1
   height: 42px
-  background-color: var(--acc)
-  color: #ffffff
+  background-color: var(--acc-fill)
+  color: var(--on-fill)
   border: none
   border-radius: 8px
   font-size: 0.95rem
@@ -110,5 +110,10 @@
   margin-top: 6px
   transition: background 0.15s ease
 
-  &:hover
-    background-color: var(--acc-strong)
+  &:hover:not(:disabled)
+    background-color: var(--acc-fill-hover)
+
+  &:disabled
+    background-color: var(--disabled-bg)
+    color: var(--disabled-ink)
+    cursor: not-allowed

@@ -17,28 +17,28 @@
     cursor: not-allowed
 
 .activate
-  background-color: var(--acc)
-  color: #fff
+  background-color: var(--acc-fill)
+  color: var(--on-fill)
   &:hover:not(:disabled)
-    background-color: var(--acc-strong)
+    background-color: var(--acc-fill-hover)
 
 .recovery
-  background-color: var(--info)
-  color: #fff
+  background-color: var(--info-fill)
+  color: var(--on-fill)
   &:hover:not(:disabled)
-    background-color: var(--info-strong)
+    background-color: var(--info-fill-hover)
 
 .ban
-  background-color: var(--danger)
-  color: #fff
+  background-color: var(--danger-fill)
+  color: var(--on-fill)
   &:hover:not(:disabled)
-    background-color: var(--danger-strong)
+    background-color: var(--danger-fill-hover)
 
 .unban
-  background-color: var(--warning)
-  color: #fff
+  background-color: var(--warning-fill)
+  color: var(--on-fill)
   &:hover:not(:disabled)
-    background-color: var(--warning-strong)
+    background-color: var(--warning-fill-hover)
 
 .linkFeedback
   display: flex
@@ -61,8 +61,8 @@
 
 .copyBtn
   padding: 3px 8px
-  background-color: var(--info)
-  color: #fff
+  background-color: var(--info-fill)
+  color: var(--on-fill)
   border: none
   border-radius: 4px
   font-size: 0.78rem
@@ -70,7 +70,7 @@
   width: fit-content
   transition: background 0.15s ease
   &:hover
-    background-color: var(--info-strong)
+    background-color: var(--info-fill-hover)
 
 .error
   font-size: 0.8rem

@@ -10,7 +10,7 @@
   padding: 0 10px
   font-size: 0.85rem
   color: var(--ink)
-  background: var(--surface)
+  background: var(--field-bg)
   border: 1px solid var(--line-strong)
   border-radius: 6px
   outline: none
@@ -33,16 +33,17 @@
   padding: 0 14px
   font-size: 0.8rem
   font-weight: 600
-  color: #ffffff
-  background: var(--acc)
+  color: var(--on-fill)
+  background: var(--acc-fill)
   border: none
   border-radius: 6px
   cursor: pointer
   transition: background 0.15s ease
 
   &:hover:not(:disabled)
-    background: var(--acc-strong)
+    background: var(--acc-fill-hover)
 
   &:disabled
-    background: #cbd5e1
+    background: var(--disabled-bg)
+    color: var(--disabled-ink)
     cursor: not-allowed

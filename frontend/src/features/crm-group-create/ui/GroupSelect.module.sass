@@ -34,8 +34,8 @@
   padding: 0 14px
   font-size: 13px
   font-weight: 600
-  color: #ffffff
-  background: var(--acc)
+  color: var(--on-fill)
+  background: var(--acc-fill)
   border: none
   border-radius: 6px
   cursor: pointer
@@ -43,10 +43,11 @@
   transition: background 0.15s ease
 
   &:hover:not(:disabled)
-    background: var(--acc-strong)
+    background: var(--acc-fill-hover)
 
   &:disabled
-    background: #cbd5e1
+    background: var(--disabled-bg)
+    color: var(--disabled-ink)
     cursor: not-allowed
 
 .dropdown
@@ -68,7 +69,7 @@
 .option
   padding: 8px 10px
   font-size: 14px
-  color: #374151
+  color: var(--ink)
   border-radius: 6px
   cursor: pointer
 
@@ -103,3 +104,9 @@
   margin-top: 4px
   font-size: 12px
   color: var(--danger)
+
+.notice
+  display: block
+  margin-top: 4px
+  font-size: 12px
+  color: var(--ink-muted)

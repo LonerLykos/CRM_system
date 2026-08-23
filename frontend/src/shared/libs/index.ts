@@ -7,4 +7,5 @@ export {getDynamicSlots} from './pagination/getDynamicSlots';
 export {formatDate} from './formatDate/formatDate';
 export {rebuildParams} from './url/rebuildParams';
 export {cleanParams} from './url/cleanParams';
+export {extractApiError} from './errors/extractApiError';
 export {zod} from './zod/zod';

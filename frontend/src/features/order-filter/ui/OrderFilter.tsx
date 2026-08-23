@@ -3,7 +3,7 @@
 import {ISearchParams} from "@/shared/model";
 import Image from "next/image";
 import {usePathname, useRouter} from "next/navigation";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {useDebouncedCallback} from "use-debounce";
 import {filterSet} from "@/features/order-filter";
 import {IChoicesResponse, IGroupResponse} from "@/entities/crm";
@@ -23,6 +23,10 @@ const NAV_KEYS: ReadonlySet<keyof ISearchParams> = new Set(['order', 'orderId'])
 const VALUE_KEYS: ReadonlyArray<string> = filterSet
     .map(({key}) => key)
     .filter((key) => key !== 'my');
+
+const VALUE_KEY_SET: ReadonlySet<string> = new Set(VALUE_KEYS);
+
+export const DEBOUNCE_MS = 500;
 
 type ValueMap = Record<string, string>;
 
@@ -46,64 +50,83 @@ export const OrderFilter = ({params, choices, groups}: FilterProp) => {
     const [values, setValues] = useState<ValueMap>(() => paramsToValues(params));
     const myChecked = params.my === 'true';
 
+    const valuesRef = useRef(values);
+    valuesRef.current = values;
+    const paramsRef = useRef(params);
+    paramsRef.current = params;
+
+    const buildQuery = useCallback((nextValues: ValueMap, myOverride?: boolean) => {
+        const newParams = new URLSearchParams();
+
+        Object.entries(paramsRef.current).forEach(([key, value]) => {
+            if (value === undefined || VALUE_KEY_SET.has(key)) return;
+            newParams.set(key, String(value));
+        });
+
+        VALUE_KEYS.forEach((key) => {
+            const value = nextValues[key];
+            if (value) {
+                newParams.set(key, value);
+            }
+        });
+
+        if (myOverride !== undefined) {
+            if (myOverride) {
+                newParams.set('my', 'true');
+            } else {
+                newParams.delete('my');
+            }
+        }
+
+        newParams.set('page', '1');
+
+        return newParams.toString();
+    }, []);
+
+    const flushFilters = useDebouncedCallback(() => {
+        replace(`${pathname}?${buildQuery(valuesRef.current)}`, {scroll: false});
+    }, DEBOUNCE_MS);
+
     // Re-sync from the URL whenever it changes externally (reset, back/forward,
-    // pagination that keeps filters). Keyed on the serialized params.
+    // pagination that keeps filters). Skipped while a write is still queued — a
+    // navigation landing mid-typing would otherwise rewrite the field with the
+    // older server value and swallow everything typed since.
     const paramsKey = JSON.stringify(params);
     useEffect(() => {
+        if (flushFilters.isPending()) return;
         setValues(paramsToValues(params));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [paramsKey]);
 
-    const handleSearch = useDebouncedCallback((key: string, filter: string) => {
-        const newParams = new URLSearchParams();
+    const applyNow = useCallback((nextValues: ValueMap, myOverride?: boolean) => {
+        flushFilters.cancel();
+        replace(`${pathname}?${buildQuery(nextValues, myOverride)}`, {scroll: false});
+    }, [buildQuery, flushFilters, pathname, replace]);
 
-        Object.entries(params).forEach(([k, value]) => {
-            if (value !== undefined) {
-                newParams.set(k, String(value));
-            }
-        });
+    // Text inputs: repaint instantly, defer the request. Each keystroke pushes
+    // the timer back, so a burst of typing costs one round-trip.
+    const handleTextChange = (key: string, value: string) => {
+        const next = {...valuesRef.current, [key]: value};
+        valuesRef.current = next;
+        setValues(next);
+        flushFilters();
+    };
 
-        if (filter) {
-            newParams.set(key, filter);
-            newParams.set('page', '1');
-        } else {
-            const isValid = filterSet.some(item => item.key === key)
-            if (!isValid || !filter) {
-                newParams.delete(key);
-            }
-        }
-
-        replace(`${pathname}?${newParams.toString()}`, {scroll: false});
-    }, 300);
-
-    // Update the visible value immediately (snappy typing), debounce the URL.
-    const handleChange = (key: string, value: string) => {
-        setValues((prev) => ({...prev, [key]: value}));
-        handleSearch(key, value);
+    const handleImmediateChange = (key: string, value: string) => {
+        const next = {...valuesRef.current, [key]: value};
+        valuesRef.current = next;
+        setValues(next);
+        applyNow(next);
     };
 
     const handleMyToggle = (checked: boolean) => {
-        const newParams = new URLSearchParams();
-
-        Object.entries(params).forEach(([k, v]) => {
-            if (v !== undefined) {
-                newParams.set(k, String(v));
-            }
-        });
-
-        if (checked) {
-            newParams.set('my', 'true');
-            newParams.set('page', '1');
-        } else {
-            newParams.delete('my');
-            newParams.set('page', '1');
-        }
-
-        replace(`${pathname}?${newParams.toString()}`, {scroll: false});
+        applyNow(valuesRef.current, checked);
     };
 
     /** M-2: reset all filter params, keep navigation keys, reset page to 1 */
     const handleResetFilters = () => {
+        flushFilters.cancel();
+
         const newParams = new URLSearchParams();
 
         (Object.keys(params) as Array<keyof ISearchParams>).forEach((k) => {
@@ -114,7 +137,9 @@ export const OrderFilter = ({params, choices, groups}: FilterProp) => {
 
         newParams.set('page', '1');
 
-        setValues(paramsToValues({}));   // clear the fields immediately
+        const cleared = paramsToValues({});
+        valuesRef.current = cleared;
+        setValues(cleared);   // clear the fields immediately
         replace(`${pathname}?${newParams.toString()}`, {scroll: false});
     };
 
@@ -130,7 +155,7 @@ export const OrderFilter = ({params, choices, groups}: FilterProp) => {
                                 key={`group-${key}`}
                                 className={styles.control}
                                 value={paramValue(key)}
-                                onChange={(e) => handleChange(key, e.target.value)}
+                                onChange={(e) => handleImmediateChange(key, e.target.value)}
                             >
                                 <option value="">All groups</option>
                                 {groups.map(({ id, name }) => (
@@ -150,7 +175,7 @@ export const OrderFilter = ({params, choices, groups}: FilterProp) => {
                                 key={`choice-${key}`}
                                 className={styles.control}
                                 value={paramValue(key)}
-                                onChange={(e) => handleChange(key, e.target.value)}
+                                onChange={(e) => handleImmediateChange(key, e.target.value)}
                             >
                                 <option value="">{value}...</option>
                                 {Object.entries(currentOptions).map(([dbValue, readableName]) => (
@@ -183,7 +208,7 @@ export const OrderFilter = ({params, choices, groups}: FilterProp) => {
                                         type="date"
                                         title="Created after"
                                         value={paramValue('created_at_gte')}
-                                        onChange={(e) => handleChange('created_at_gte', e.target.value)}
+                                        onChange={(e) => handleImmediateChange('created_at_gte', e.target.value)}
                                     />
                                     <span className={styles.dateSep}>–</span>
                                     <input
@@ -191,7 +216,7 @@ export const OrderFilter = ({params, choices, groups}: FilterProp) => {
                                         type="date"
                                         title="Created before"
                                         value={paramValue('created_at_lte')}
-                                        onChange={(e) => handleChange('created_at_lte', e.target.value)}
+                                        onChange={(e) => handleImmediateChange('created_at_lte', e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -204,7 +229,7 @@ export const OrderFilter = ({params, choices, groups}: FilterProp) => {
                             className={styles.control}
                             placeholder={`${value}...`}
                             value={paramValue(key)}
-                            onChange={(e) => handleChange(key, e.target.value)}
+                            onChange={(e) => handleTextChange(key, e.target.value)}
                         />
                     );
                 })}

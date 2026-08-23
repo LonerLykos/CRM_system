@@ -1,7 +1,7 @@
 .openBtn
   padding: 8px 20px
-  background-color: var(--acc)
-  color: #fff
+  background-color: var(--acc-fill)
+  color: var(--on-fill)
   border: none
   border-radius: 6px
   font-size: 0.9rem
@@ -9,7 +9,7 @@
   cursor: pointer
   transition: background 0.2s
   &:hover
-    background-color: var(--acc-strong)
+    background-color: var(--acc-fill-hover)
 
 .overlay
   position: fixed
@@ -56,7 +56,7 @@
   gap: 4px
   font-size: 0.85rem
   font-weight: 600
-  color: #444
+  color: var(--ink)
 
 .input
   padding: 8px 10px
@@ -64,9 +64,13 @@
   border-radius: 6px
   font-size: 0.95rem
   color: var(--ink)
+  background: var(--field-bg)
   outline: none
-  transition: border-color 0.2s, box-shadow 0.2s
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s
+  &::placeholder
+    color: var(--ink-faint)
   &:focus
+    background: var(--surface)
     border-color: var(--acc)
     box-shadow: 0 0 0 3px var(--acc-ring)
 
@@ -78,8 +82,8 @@
 .submitBtn
   margin-top: 4px
   padding: 10px
-  background-color: var(--acc)
-  color: #fff
+  background-color: var(--acc-fill)
+  color: var(--on-fill)
   border: none
   border-radius: 6px
   font-size: 0.95rem
@@ -87,7 +91,7 @@
   cursor: pointer
   transition: background 0.2s
   &:hover:not(:disabled)
-    background-color: var(--acc-strong)
+    background-color: var(--acc-fill-hover)
   &:disabled
     opacity: 0.6
     cursor: not-allowed
@@ -116,8 +120,8 @@
 
 .copyBtn
   padding: 8px 16px
-  background-color: var(--info)
-  color: #fff
+  background-color: var(--info-fill)
+  color: var(--on-fill)
   border: none
   border-radius: 6px
   font-size: 0.9rem
@@ -125,12 +129,12 @@
   cursor: pointer
   transition: background 0.2s
   &:hover
-    background-color: var(--info-strong)
+    background-color: var(--info-fill-hover)
 
 .doneBtn
   padding: 8px 16px
-  background-color: var(--acc)
-  color: #fff
+  background-color: var(--acc-fill)
+  color: var(--on-fill)
   border: none
   border-radius: 6px
   font-size: 0.9rem
@@ -138,4 +142,4 @@
   cursor: pointer
   transition: background 0.15s ease
   &:hover
-    background-color: var(--acc-strong)
+    background-color: var(--acc-fill-hover)

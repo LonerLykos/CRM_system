@@ -8,6 +8,7 @@ import {getCachedChoices} from "@/entities/crm";
 import {crmService} from "@/entities/crm";
 import {IOrderDetailResponse} from "@/entities/order";
 import {GroupSelect} from "@/features/crm-group-create";
+import {SubmitButton} from "@/shared/ui";
 import s from './OrderUpdateForm.module.sass';
 
 interface OrderUpdateProps {
@@ -203,9 +204,12 @@ export const OrderUpdateForm = async ({params, order}: OrderUpdateProps) => {
                             />
                         </div>
 
-                        <button type='submit' className={`${s.submit_btn} ${s.full_width}`}>
+                        <SubmitButton
+                            className={`${s.submit_btn} ${s.full_width}`}
+                            pendingLabel='Updating…'
+                        >
                             Update
-                        </button>
+                        </SubmitButton>
                     </div>
                 </Form>
             </div>

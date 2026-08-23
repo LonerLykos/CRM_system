@@ -15,11 +15,11 @@
   border-radius: 13px
   display: grid
   place-items: center
-  color: #fff
+  color: var(--on-fill)
   font-weight: 800
   font-size: 17px
   letter-spacing: -0.02em
-  background: linear-gradient(150deg, var(--acc) 0%, var(--acc-strong) 100%)
+  background: linear-gradient(150deg, var(--acc-fill) 0%, var(--acc-fill-hover) 100%)
   box-shadow: 0 8px 18px -6px var(--acc-ring)
 
 .title
@@ -81,7 +81,7 @@
     color: var(--ink-faint)
 
   &:hover
-    border-color: #bfbbb0
+    border-color: var(--line-hover)
 
   &:focus
     border-color: var(--acc)
@@ -112,8 +112,8 @@
   font: inherit
   font-size: 14.5px
   font-weight: 700
-  color: #fff
-  background: var(--acc)
+  color: var(--on-fill)
+  background: var(--acc-fill)
   border: 0
   border-radius: 11px
   cursor: pointer
@@ -121,7 +121,7 @@
   transition: background 0.16s var(--ease), transform 0.08s var(--ease)
 
   &:hover
-    background: var(--acc-strong)
+    background: var(--acc-fill-hover)
 
   &:active
     transform: translateY(1px)

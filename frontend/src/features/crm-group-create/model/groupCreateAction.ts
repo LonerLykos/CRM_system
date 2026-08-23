@@ -2,10 +2,16 @@
 
 import {revalidatePath} from "next/cache";
 import {crmService, IGroupResponse} from "@/entities/crm";
+import {extractApiError} from "@/shared/libs";
 import {groupCreateSchema} from "./groupCreateSchema";
 
+export interface GroupCreateResult {
+    group?: IGroupResponse;
+    created?: boolean;
+    error?: string;
+}
 
-export async function groupCreateAction(name: string): Promise<{ group?: IGroupResponse; error?: string }> {
+export async function groupCreateAction(name: string): Promise<GroupCreateResult> {
     const validated = groupCreateSchema.safeParse({name});
 
     if (!validated.success) {
@@ -16,21 +22,12 @@ export async function groupCreateAction(name: string): Promise<{ group?: IGroupR
 
     if (ok) {
         revalidatePath('/crm');
-        // Backend is get_or_create: `result` is the created OR pre-existing group.
-        return {group: result ?? undefined};
+        return {group: result ?? undefined, created: status === 201};
     }
 
     if (status === 500) {
         return {error: 'The server is not responding'};
     }
 
-    if (error && 'detail' in error) {
-        return {error: error.detail as string};
-    }
-
-    if (error && 'statusText' in error) {
-        return {error: error.statusText as string};
-    }
-
-    return {error: 'Failed to create group'};
+    return {error: extractApiError(error, 'Failed to create group')};
 }

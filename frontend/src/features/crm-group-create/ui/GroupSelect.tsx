@@ -32,6 +32,7 @@ export const GroupSelect = ({
     const [query, setQuery] = useState(defaultGroupName);
     const [open, setOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [notice, setNotice] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
     const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +67,7 @@ export const GroupSelect = ({
         setQuery(group.name);
         setOpen(false);
         setError(null);
+        setNotice(null);
     };
 
     const pickNone = () => {
@@ -73,12 +75,14 @@ export const GroupSelect = ({
         setQuery('');
         setOpen(false);
         setError(null);
+        setNotice(null);
     };
 
     const onType = (value: string) => {
         setQuery(value);
         setOpen(true);
         setError(null);
+        setNotice(null);
         // The hidden id stays valid only while the text exactly matches an
         // existing group; anything else means "nothing selected yet".
         const match = groups.find((g) => normalize(g.name) === normalize(value));
@@ -89,6 +93,7 @@ export const GroupSelect = ({
         const raw = query.trim();
         if (!raw || isPending) return;
         setError(null);
+        setNotice(null);
         startTransition(async () => {
             const res = await groupCreateAction(raw);
             if (res.error || !res.group) {
@@ -96,6 +101,11 @@ export const GroupSelect = ({
                 return;
             }
             const group = res.group;
+            setNotice(
+                res.created
+                    ? `Group “${group.name}” created`
+                    : `Group “${group.name}” already exists — selected it`,
+            );
             // Idempotent create: if it already existed (another manager won the
             // race) the backend returns that row — merge it in and select it.
             setGroups((prev) =>
@@ -131,7 +141,7 @@ export const GroupSelect = ({
                     className={s.addBtn}
                     onClick={create}
                     disabled={!canCreate || isPending}
-                    title={canCreate ? `Create “${query.trim()}”` : 'Type a new group name to enable'}
+                    title={canCreate ? `Create “${q}”` : 'Type a new group name to enable'}
                 >
                     {isPending ? '…' : '+ Add group'}
                 </button>
@@ -156,13 +166,14 @@ export const GroupSelect = ({
                     )}
                     {canCreate && (
                         <li className={s.create} onMouseDown={(e) => { e.preventDefault(); create(); }}>
-                            + Create “{query.trim()}”
+                            + Create “{q}”
                         </li>
                     )}
                 </ul>
             )}
 
             {error && <span className={s.error}>{error}</span>}
+            {!error && notice && <span className={s.notice}>{notice}</span>}
         </div>
     );
 };

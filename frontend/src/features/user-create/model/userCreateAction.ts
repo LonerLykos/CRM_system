@@ -3,6 +3,7 @@
 import {revalidatePath} from "next/cache";
 import {userCreateSchema} from "@/features/user-create";
 import {userService} from "@/entities/user";
+import {extractApiError} from "@/shared/libs";
 
 export type UserCreateActionState = {
     ok: true;
@@ -35,9 +36,5 @@ export async function userCreateAction(
         return {ok: false, error: 'The server is not responding'};
     }
 
-    if (error && 'detail' in error && error.detail) {
-        return {ok: false, error: error.detail};
-    }
-
-    return {ok: false, error: 'Failed to create user'};
+    return {ok: false, error: extractApiError(error, 'Failed to create user')};
 }
