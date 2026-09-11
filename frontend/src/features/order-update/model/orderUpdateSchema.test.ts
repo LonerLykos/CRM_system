@@ -211,7 +211,7 @@ describe('orderUpdateSchema', () => {
     })
   })
 
-  describe('cross-field: already_paid <= sum', () => {
+  describe('cross-field: already_paid vs sum', () => {
     it('rejects already_paid greater than sum', () => {
       const result = orderUpdateSchema.safeParse({ sum: '500', already_paid: '600' })
       expect(result.success).toBe(false)
@@ -232,8 +232,27 @@ describe('orderUpdateSchema', () => {
       expect(result.success).toBe(true)
     })
 
-    it('skips cross-field check when sum is null', () => {
-      const result = orderUpdateSchema.safeParse({ sum: '', already_paid: '999' })
+    it('rejects already_paid when the sum is empty', () => {
+      const result = orderUpdateSchema.safeParse({ sum: '', already_paid: '5000' })
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const err = result.error.issues.find(i => i.path[0] === 'already_paid')
+        expect(err?.message).toBe('Already paid cannot be set without a sum')
+      }
+    })
+
+    it('rejects a zero already_paid without a sum too', () => {
+      const result = orderUpdateSchema.safeParse({ sum: '', already_paid: '0' })
+      expect(result.success).toBe(false)
+    })
+
+    it('leaves the check to the server when the sum is not sent', () => {
+      const result = orderUpdateSchema.safeParse({ already_paid: '999' })
+      expect(result.success).toBe(true)
+    })
+
+    it('accepts both cleared', () => {
+      const result = orderUpdateSchema.safeParse({ sum: '', already_paid: '' })
       expect(result.success).toBe(true)
     })
 

@@ -28,5 +28,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(make_case_sensitive, restore_default_collation),
+        migrations.RunPython(make_case_sensitive, restore_default_collation, atomic=False),
     ]

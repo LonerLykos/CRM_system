@@ -54,7 +54,11 @@ class OrderUpdateSerializer(OrderBaseSerializer):
         if 'sum' in attrs or 'already_paid' in attrs:
             total = attrs.get('sum', getattr(self.instance, 'sum', None))
             paid = attrs.get('already_paid', getattr(self.instance, 'already_paid', None))
-            if total is not None and paid is not None and paid > total:
+            if paid is not None and total is None:
+                raise serializers.ValidationError(
+                    {'already_paid': 'Already paid cannot be set without a sum'}
+                )
+            if paid is not None and paid > total:
                 raise serializers.ValidationError(
                     {'already_paid': 'Already paid cannot be greater than sum'}
                 )

@@ -84,6 +84,16 @@ describe('orderUpdateAction', () => {
         })
     })
 
+    describe('given only already_paid is filled while the sum is empty', () => {
+        it('then the payment is refused before any request', async () => {
+            const state = await submit({ already_paid: '5000' })
+
+            expect(state?.error).toBe('Already paid cannot be set without a sum')
+            expect(state?.values.already_paid).toBe('5000')
+            expect(updateOrderMock).not.toHaveBeenCalled()
+        })
+    })
+
     describe('given the server is unreachable', () => {
         it('then a readable message is returned', async () => {
             updateOrderMock.mockResolvedValue({

@@ -227,6 +227,7 @@ EMAIL_151 = "a" * 64 + "@" + "b" * 63 + "." + "c" * 18 + ".com"
     ({"sum": -100}, "sum"),
     ({"already_paid": -1}, "already_paid"),
     ({"sum": 10, "already_paid": 999}, "already_paid"),
+    ({"already_paid": 0}, "already_paid"),
     ({"phone": "abc"}, "phone"),
     ({"phone": "0991122345"}, "phone"),
     ({"surname": "S" * 51}, "surname"),
@@ -264,6 +265,54 @@ def test_order_update_checks_already_paid_against_stored_sum(manager_client, ord
     )
     assert response.status_code == 400
     assert response.json() == {"already_paid": ["Already paid cannot be greater than sum"]}
+
+
+@pytest.mark.django_db
+def test_order_update_rejects_already_paid_without_sum(manager_client, order_no_manager):
+    """
+    Paid 5000 with no sum would block saving any smaller price later.
+    """
+    response = manager_client.patch(
+        f"/orders/{order_no_manager.pk}/update",
+        data={"already_paid": 5000},
+        format="json",
+    )
+    assert response.status_code == 400
+    assert response.json() == {"already_paid": ["Already paid cannot be set without a sum"]}
+
+    order_no_manager.refresh_from_db()
+    assert order_no_manager.already_paid is None
+
+
+@pytest.mark.django_db
+def test_order_update_rejects_clearing_sum_while_paid_is_stored(manager_client, order_no_manager):
+    OrdersModel.objects.filter(pk=order_no_manager.pk).update(sum=1000, already_paid=500)
+
+    response = manager_client.patch(
+        f"/orders/{order_no_manager.pk}/update",
+        data={"sum": None},
+        format="json",
+    )
+    assert response.status_code == 400
+    assert response.json() == {"already_paid": ["Already paid cannot be set without a sum"]}
+
+    order_no_manager.refresh_from_db()
+    assert order_no_manager.sum == 1000
+
+
+@pytest.mark.django_db
+def test_order_update_accepts_already_paid_within_stored_sum(manager_client, order_no_manager):
+    OrdersModel.objects.filter(pk=order_no_manager.pk).update(sum=1000)
+
+    response = manager_client.patch(
+        f"/orders/{order_no_manager.pk}/update",
+        data={"already_paid": 500},
+        format="json",
+    )
+    assert response.status_code == 200
+
+    order_no_manager.refresh_from_db()
+    assert order_no_manager.already_paid == 500
 
 
 @pytest.mark.django_db

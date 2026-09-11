@@ -276,7 +276,7 @@ Interactive documentation (OpenAPI 3 via drf-spectacular):
 | POST | `/orders/groups/create` | Create a group (the case is kept; names are unique case-sensitively — `Group A` and `group a` are separate groups, an exact duplicate → `400`) |
 | GET | `/orders/choices` | Enum choices for order fields |
 | GET | `/orders/{pk}` | Order detail (with comments) |
-| PATCH | `/orders/{pk}/update` | Update an order (name ≤ 25, surname ≤ 50, email ≤ 150 chars, age 1–100, `sum`/`already_paid` ≥ 0 and `already_paid` ≤ `sum`, phone in E.164) |
+| PATCH | `/orders/{pk}/update` | Update an order (name ≤ 25, surname ≤ 50, email ≤ 150 chars, age 1–100, `sum`/`already_paid` ≥ 0, `already_paid` only together with a `sum` and ≤ it, phone in E.164) |
 | POST | `/orders/{pk}/comment` | Add a comment |
 | GET | `/users` | List managers (paginated) |
 | POST | `/users/create_user` | Create a manager (admin; email ≤ 150 chars) |

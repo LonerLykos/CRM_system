@@ -39,6 +39,11 @@ def test_mysql_reverse_restores_table_default_collation():
     )
 
 
+def test_runs_outside_a_transaction():
+    # MySQL can't roll back DDL, so Django refuses ALTER inside an atomic block.
+    assert migration.Migration.operations[0].atomic is False
+
+
 def test_other_databases_are_left_alone():
     editor = _schema_editor('sqlite')
 

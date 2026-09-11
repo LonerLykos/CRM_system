@@ -101,6 +101,11 @@ export const orderUpdateSchema = zod.object({
         zod.string().nullish(),
     ),
 })
+    // sum === null: cleared in the form; undefined: not sent, the server checks the stored one
+    .refine((data) => !(data.already_paid != null && data.sum === null), {
+        error: 'Already paid cannot be set without a sum',
+        path: ['already_paid'],
+    })
     .refine((data) => {
         if (data.already_paid != null && data.sum != null) {
             return data.already_paid <= data.sum
