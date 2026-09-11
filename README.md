@@ -168,17 +168,6 @@ one-time link the manager uses to set a password.
 ### Permission matrix
  
 The DRF default is `IsAuthenticated` + `IsUnbannedUser`. Specific groups tighten this:
-<<<<<<< Updated upstream
- 
-| Access level            | Permission classes                                  | Endpoints                                                                                                                                                                               |
-| ----------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Public                  | `AllowAny`                                          | `GET /health`, `POST /users/set_password/{token}`                                                                                                                                       |
-| Login / refresh         | throttled, `auth` scope (10/min)                    | `POST /auth`, `POST /auth/refresh`                                                                                                                                                      |
-| Authenticated (default) | `IsAuthenticated`, `IsUnbannedUser`                 | `GET /auth/me`, `POST /auth/logout`, all `GET` reads under `/orders/*` and `/users/*`                                                                                                   |
-| Active manager          | `IsAuthenticated`, `IsActiveUser`, `IsUnbannedUser` | `PATCH /orders/{pk}/update`, `POST /orders/{pk}/comment`, `POST /orders/groups/create`                                                                                                  |
-| Admin                   | `IsAdminUser`, `IsActiveUser`, `IsUnbannedUser`     | `POST /users/create_user`, `PATCH /users/{pk}/active_toggle`, `PATCH /users/{pk}/ban_toggle`, `PATCH /users/{pk}/restore_password`, `GET /users/statistic`, `GET /users/{pk}/statistic` |
- 
-=======
 
 | Access level | Permission classes | Endpoints |
 |--------------|--------------------|-----------|
@@ -188,7 +177,6 @@ The DRF default is `IsAuthenticated` + `IsUnbannedUser`. Specific groups tighten
 | Active manager | `IsAuthenticated`, `IsActiveUser`, `IsUnbannedUser` | `PATCH /orders/{pk}/update`, `POST /orders/{pk}/comment`, `POST /orders/groups/create` |
 | Admin | `IsAdminUser`, `IsActiveUser`, `IsUnbannedUser` | `POST /users/create_user`, `PATCH /users/{pk}/activate`, `PATCH /users/{pk}/deactivate`, `PATCH /users/{pk}/ban`, `PATCH /users/{pk}/unban`, `PATCH /users/{pk}/restore_password`, `GET /users/statistic`, `GET /users/{pk}/statistic` |
 
->>>>>>> Stashed changes
 Only login and refresh are throttled (10/min, `auth` scope); there is no global throttle.
  
 ## Features
@@ -213,15 +201,9 @@ Admin-only aggregation of orders by status:
  
 - `GET /users/statistic` — across all orders;
 - `GET /users/{pk}/statistic` — for one manager.
-<<<<<<< Updated upstream
-Response: `{ total, new, in_work, agree, disagree, dubbing }` (rows with `status=null` count
-as `new`).
- 
-=======
 
 Response: `{ total, new, in_work, agree, disagree, dubbing }` (rows without a status — `null` or empty — count as `new`, the same rule the `status=new` filter uses).
 
->>>>>>> Stashed changes
 ## Testing and code quality
  
 Backend — pytest + pytest-django (isolated in-memory SQLite, Celery in eager mode, no Redis
@@ -276,46 +258,6 @@ Interactive documentation (OpenAPI 3 via drf-spectacular):
  
 - `GET /api/schema` — OpenAPI schema
 - `GET /api/docs` — Swagger UI
-<<<<<<< Updated upstream
-| Method | URL                                 | Description                                                               |
-| ------ | ----------------------------------- | ------------------------------------------------------------------------- |
-| GET    | `/health`                           | Health probe: `200 {"status":"ok"}`, `503` if the database is unreachable |
-| GET    | `/api/schema`                       | OpenAPI schema                                                            |
-| GET    | `/api/docs`                         | Swagger UI                                                                |
-| POST   | `/auth`                             | Login (email + password) — throttled 10/min                               |
-| POST   | `/auth/refresh`                     | Refresh access token (from cookie) — throttled 10/min                     |
-| POST   | `/auth/logout`                      | Logout (blacklist refresh token, clear cookies)                           |
-| GET    | `/auth/me`                          | Current user                                                              |
-| GET    | `/orders`                           | List orders (filtering, pagination 25, ordering)                          |
-| GET    | `/orders/export`                    | Excel export by filters (hybrid sync/async)                               |
-| GET    | `/orders/export/{task_id}`          | Async export status/progress                                              |
-| GET    | `/orders/export/{task_id}/download` | Download a finished export                                                |
-| GET    | `/orders/groups`                    | List groups                                                               |
-| POST   | `/orders/groups/create`             | Create a group                                                            |
-| GET    | `/orders/choices`                   | Enum choices for order fields                                             |
-| GET    | `/orders/{pk}`                      | Order detail (with comments)                                              |
-| PATCH  | `/orders/{pk}/update`               | Update an order                                                           |
-| POST   | `/orders/{pk}/comment`              | Add a comment                                                             |
-| GET    | `/users`                            | List managers (paginated)                                                 |
-| POST   | `/users/create_user`                | Create a manager (admin)                                                  |
-| GET    | `/users/statistic`                  | Global order statistics (admin)                                           |
-| GET    | `/users/{pk}`                       | Manager detail                                                            |
-| GET    | `/users/{pk}/statistic`             | Manager order statistics (admin)                                          |
-| PATCH  | `/users/{pk}/active_toggle`         | Toggle `is_active` (admin)                                                |
-| PATCH  | `/users/{pk}/ban_toggle`            | Toggle `is_banned` (admin)                                                |
-| PATCH  | `/users/{pk}/restore_password`      | Reset password, issue a one-time token (admin)                            |
-| POST   | `/users/set_password/{token}`       | Set a password via one-time token                                         |
- 
-### `GET /orders` filters (query params)
- 
-Text (icontains): `name_contains`, `surname_contains`, `email_contains`, `phone_contains`,
-`group_name_contains`. Group by id: `group`. Choices: `course`, `course_type`,
-`course_format`, `status`. Numeric (exact): `age_eq`, `sum_eq`, `already_paid_eq`. Date
-range: `created_at_gte`, `created_at_lte`. `my=true` limits results to the current manager's
-orders. `order` sets ordering (prefix `-` for descending). `page` / `size` control pagination
-(default 25, max 100). `GET /orders/export` accepts the same parameters.
- 
-=======
 
 | Method | URL | Description |
 |--------|-----|-------------|
@@ -352,7 +294,6 @@ orders. `order` sets ordering (prefix `-` for descending). `page` / `size` contr
 
 Text (icontains): `name_contains`, `surname_contains`, `email_contains`, `phone_contains`, `group_name_contains`. Group by id: `group`. Choices: `course`, `course_type`, `course_format`, `status` (`status=new` also matches orders without a status). Numeric (exact): `age_eq`, `sum_eq`, `already_paid_eq`. Date range: `created_at_gte`, `created_at_lte` — dates `YYYY-MM-DD`, both ends inclusive (the whole end day is included). `my=true` limits to the current manager's orders. `order` sets ordering (prefix `-` for descending). `page` / `size` control pagination (default 25, max 100). `GET /orders/export` accepts the same parameters.
 
->>>>>>> Stashed changes
 ### Postman
  
 Import `postman/CRM_system.postman_collection.json` (schema v2.1.0). All variables
