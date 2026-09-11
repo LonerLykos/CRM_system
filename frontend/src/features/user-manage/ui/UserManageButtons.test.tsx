@@ -9,11 +9,13 @@ import userEvent from '@testing-library/user-event'
 // does not intercept because Vitest resolves the component's import to the
 // concrete file. Mocking the relative concrete file does work.
 const restorePasswordActionMock = vi.fn()
-const banToggleActionMock = vi.fn()
+const banUserActionMock = vi.fn()
+const unbanUserActionMock = vi.fn()
 
 vi.mock('../model/userManageActions', () => ({
     restorePasswordAction: (...args: unknown[]) => restorePasswordActionMock(...args),
-    banToggleAction: (...args: unknown[]) => banToggleActionMock(...args),
+    banUserAction: (...args: unknown[]) => banUserActionMock(...args),
+    unbanUserAction: (...args: unknown[]) => unbanUserActionMock(...args),
 }))
 
 import { UserManageButtons } from './UserManageButtons'
@@ -36,7 +38,8 @@ const stubClipboard = () => {
 describe('UserManageButtons', () => {
     beforeEach(() => {
         restorePasswordActionMock.mockReset()
-        banToggleActionMock.mockReset()
+        banUserActionMock.mockReset()
+        unbanUserActionMock.mockReset()
     })
 
     // ── Conditional button rendering ─────────────────────────────────────────
@@ -153,38 +156,40 @@ describe('UserManageButtons', () => {
     // ── Ban button ────────────────────────────────────────────────────────────
 
     describe('given an active, non-banned user', () => {
-        it('when the user clicks Ban, then banToggleAction is called with pk', async () => {
-            banToggleActionMock.mockResolvedValue({ ok: true })
+        it('when the user clicks Ban, then banUserAction (never unban) is called with pk', async () => {
+            banUserActionMock.mockResolvedValue({ ok: true })
 
             render(<UserManageButtons pk={10} isActive={true} isBanned={false} />)
             await userEvent.click(screen.getByRole('button', { name: /^ban$/i }))
 
             await waitFor(() =>
-                expect(banToggleActionMock).toHaveBeenCalledWith(10)
+                expect(banUserActionMock).toHaveBeenCalledWith(10)
             )
+            expect(unbanUserActionMock).not.toHaveBeenCalled()
         })
     })
 
     // ── Unban button ──────────────────────────────────────────────────────────
 
     describe('given a banned user', () => {
-        it('when the user clicks Unban, then banToggleAction is called with pk', async () => {
-            banToggleActionMock.mockResolvedValue({ ok: true })
+        it('when the user clicks Unban, then unbanUserAction (never ban) is called with pk', async () => {
+            unbanUserActionMock.mockResolvedValue({ ok: true })
 
             render(<UserManageButtons pk={11} isActive={true} isBanned={true} />)
             await userEvent.click(screen.getByRole('button', { name: /unban/i }))
 
             await waitFor(() =>
-                expect(banToggleActionMock).toHaveBeenCalledWith(11)
+                expect(unbanUserActionMock).toHaveBeenCalledWith(11)
             )
+            expect(banUserActionMock).not.toHaveBeenCalled()
         })
     })
 
-    // ── banToggleAction error ─────────────────────────────────────────────────
+    // ── banUserAction error ───────────────────────────────────────────────────
 
-    describe('given banToggleAction returns an error', () => {
+    describe('given banUserAction returns an error', () => {
         it('when the user clicks Ban, then the error message is displayed', async () => {
-            banToggleActionMock.mockResolvedValue({
+            banUserActionMock.mockResolvedValue({
                 ok: false,
                 error: 'Ban failed',
             })

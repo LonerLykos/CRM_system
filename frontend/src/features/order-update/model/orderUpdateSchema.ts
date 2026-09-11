@@ -40,6 +40,11 @@ export const orderUpdateSchema = zod.object({
     email: zod.preprocess(
         emptyToNull,
         zod.email()
+            .max(150, {
+                error: (iss) => {
+                    return `The email must be at most ${iss.maximum} characters`
+                }
+            })
             .nullish()
     ),
     phone: zod.preprocess(

@@ -1,10 +1,11 @@
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.auth.services.auth_service import AuthService
+from apps.users.serializers.serializers import SetPasswordSerializer
 from apps.users.services.user_service import UserService
 
 
@@ -12,15 +13,12 @@ class UserSetPasswordView(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
-        request=inline_serializer(
-            name='SetPasswordRequest',
-            fields={
-                'password': serializers.CharField(
-                    help_text='New password to set for the user account'
-                ),
-            },
-        ),
+        request=SetPasswordSerializer,
         responses={
+            400: OpenApiResponse(
+                description='Password rejected (shorter than 8 characters or entirely numeric). '
+                            'The token is not consumed, so the same link can be retried.',
+            ),
             200: inline_serializer(
                 name='SetPasswordResponse',
                 fields={
@@ -47,7 +45,10 @@ class UserSetPasswordView(APIView):
         ),
     )
     def post(self, request, token, *args, **kwargs):
-        user = UserService.user_set_password(request.data.get('password'), token)
+        serializer = SetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = UserService.user_set_password(serializer.validated_data['password'], token)
         auth_data = AuthService.get_auth_data(user)
 
         response = Response({

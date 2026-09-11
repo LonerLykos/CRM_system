@@ -3,35 +3,20 @@ Tests for UserService business-logic layer.
 
 Coverage:
 - create()         → returns (token, user); user.is_active=False; password unusable
-- user_active_toggle() → inverts is_active
-- user_ban_toggle()    → inverts is_banned
+- set_active()     → writes the requested is_active; repeating it is a no-op
+- set_banned()     → writes the requested is_banned; repeating it is a no-op
+- self-action guard → an admin can't ban / deactivate themselves
 - user_restore_password() → returns new PasswordToken; password becomes unusable
 - user_set_password()  → sets password + activates user
 - token one-time use   → second call raises JWTException
 """
 import pytest
 from core.exceptions.jwt_exception import JWTException
+from core.exceptions.users_exceptions import SelfActionDenied
 from core.services.jwt_service import JWTService, PasswordToken
 
 from apps.users.models import UserModel as User
 from apps.users.services.user_service import UserService
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _make_user(db, *, email="svc@test.com", name="Svc", surname="User",
-               is_active=False, is_banned=False, password=None):
-    """Create a UserModel instance directly (not via UserService.create)."""
-    u = User.objects.create_user(
-        email=email, name=name, surname=surname,
-        is_active=is_active, password=password,
-    )
-    if is_banned:
-        u.is_banned = True
-        u.save()
-    return u
-
 
 # ---------------------------------------------------------------------------
 # create()
@@ -72,31 +57,7 @@ class TestUserServiceCreate:
 
 
 # ---------------------------------------------------------------------------
-# user_active_toggle()
-# ---------------------------------------------------------------------------
-
-@pytest.mark.django_db
-class TestUserActiveToggle:
-    def test_toggle_false_to_true(self):
-        u = _make_user(pytest.importorskip("django.db"), is_active=False)
-        # Workaround: use db directly via the fixture trick (call via method)
-        result = UserService.user_active_toggle(u.pk)
-        assert result.is_active is True
-
-    def test_toggle_true_to_false(self):
-        u = _make_user(pytest.importorskip("django.db"), is_active=True)
-        result = UserService.user_active_toggle(u.pk)
-        assert result.is_active is False
-
-    def test_toggle_persisted_in_db(self):
-        u = _make_user(pytest.importorskip("django.db"), is_active=False)
-        UserService.user_active_toggle(u.pk)
-        u.refresh_from_db()
-        assert u.is_active is True
-
-
-# ---------------------------------------------------------------------------
-# Re-write helpers using proper pytest fixtures
+# Fixtures
 # ---------------------------------------------------------------------------
 
 @pytest.fixture
@@ -124,44 +85,81 @@ def banned_user(db):
 
 
 # ---------------------------------------------------------------------------
-# active_toggle (proper fixtures)
+# set_active()
 # ---------------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_active_toggle_inactive_to_active(plain_user):
-    result = UserService.user_active_toggle(plain_user.pk)
+def test_set_active_true_activates(plain_user):
+    result = UserService.set_active(plain_user.pk, True)
     assert result.is_active is True
     plain_user.refresh_from_db()
     assert plain_user.is_active is True
 
 
 @pytest.mark.django_db
-def test_active_toggle_active_to_inactive(active_user):
-    result = UserService.user_active_toggle(active_user.pk)
+def test_set_active_false_deactivates(active_user):
+    result = UserService.set_active(active_user.pk, False)
     assert result.is_active is False
     active_user.refresh_from_db()
     assert active_user.is_active is False
 
 
+@pytest.mark.django_db
+def test_set_active_repeated_is_noop(active_user):
+    """Activating twice leaves the user active — no toggle back."""
+    UserService.set_active(active_user.pk, True)
+    UserService.set_active(active_user.pk, True)
+    active_user.refresh_from_db()
+    assert active_user.is_active is True
+
+
 # ---------------------------------------------------------------------------
-# ban_toggle
+# set_banned()
 # ---------------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_ban_toggle_unbanned_to_banned(active_user):
+def test_set_banned_true_bans(active_user):
     assert active_user.is_banned is False
-    result = UserService.user_ban_toggle(active_user.pk)
+    result = UserService.set_banned(active_user.pk, True)
     assert result.is_banned is True
     active_user.refresh_from_db()
     assert active_user.is_banned is True
 
 
 @pytest.mark.django_db
-def test_ban_toggle_banned_to_unbanned(banned_user):
-    result = UserService.user_ban_toggle(banned_user.pk)
+def test_set_banned_false_unbans(banned_user):
+    result = UserService.set_banned(banned_user.pk, False)
     assert result.is_banned is False
     banned_user.refresh_from_db()
     assert banned_user.is_banned is False
+
+
+@pytest.mark.django_db
+def test_set_banned_repeated_keeps_user_banned(active_user):
+    """
+    The old toggle unbanned on a second "Ban" (stale tab, two admins at once);
+    now the second request changes nothing.
+    """
+    UserService.set_banned(active_user.pk, True)
+    UserService.set_banned(active_user.pk, True)
+    active_user.refresh_from_db()
+    assert active_user.is_banned is True
+
+
+@pytest.mark.django_db
+def test_set_banned_on_self_is_denied(active_user):
+    with pytest.raises(SelfActionDenied):
+        UserService.set_banned(active_user.pk, True, requester_id=active_user.pk)
+    active_user.refresh_from_db()
+    assert active_user.is_banned is False
+
+
+@pytest.mark.django_db
+def test_set_active_on_self_is_denied(active_user):
+    with pytest.raises(SelfActionDenied):
+        UserService.set_active(active_user.pk, False, requester_id=active_user.pk)
+    active_user.refresh_from_db()
+    assert active_user.is_active is True
 
 
 # ---------------------------------------------------------------------------

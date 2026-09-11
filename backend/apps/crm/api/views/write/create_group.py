@@ -1,6 +1,6 @@
 from core.permissions.is_active_user import IsActiveUser
 from core.permissions.is_unbanned_user import IsUnbannedUser
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -18,13 +18,15 @@ class AddGroupView(APIView):
         request=GroupsSerializer,
         responses={
             201: GroupsSerializer,
-            200: GroupsSerializer,
+            400: OpenApiResponse(
+                description='Validation error, e.g. a group with this name already exists.',
+            ),
         },
-        summary='Create a group (idempotent)',
+        summary='Create a group',
         description=(
-            'Creates a group with the given (normalized) name. Idempotent: if a '
-            'group with that name already exists it is returned as-is with 200 '
-            'instead of a validation error; a newly created group returns 201.'
+            'Creates a group with the given name (surrounding whitespace is trimmed, '
+            'the case is kept as typed). Names are unique case-sensitively: "Group A" '
+            'and "group a" are separate groups, while an exact duplicate returns 400.'
         ),
     )
     def post(self, request):
@@ -33,6 +35,5 @@ class AddGroupView(APIView):
 
         service = GroupsService()
 
-        group, created = service.create_group(name=serializer.validated_data['name'])
-        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
-        return Response(self.serializer_class(group).data, status=status_code)
+        group = service.create_group(name=serializer.validated_data['name'])
+        return Response(self.serializer_class(group).data, status=status.HTTP_201_CREATED)

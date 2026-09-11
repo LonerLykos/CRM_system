@@ -15,12 +15,6 @@ interface GroupSelectProps {
 
 const normalize = (value: string) => value.trim().toLowerCase();
 
-/**
- * Find-or-create group picker. Type to search existing groups; when the typed
- * name doesn't exist yet the "Add group" action becomes enabled and calls the
- * backend `get_or_create` — so two managers creating the same group race-safely
- * end up selecting the very same row (one creates it, the other receives it).
- */
 export const GroupSelect = ({
     groups: initialGroups,
     defaultGroupId = '',
@@ -37,6 +31,7 @@ export const GroupSelect = ({
     const wrapRef = useRef<HTMLDivElement>(null);
 
     const q = normalize(query);
+    const typedName = query.trim();
 
     const filtered = useMemo(
         () => (q ? groups.filter((g) => normalize(g.name).includes(q)) : groups),
@@ -44,12 +39,12 @@ export const GroupSelect = ({
     );
 
     const exactMatch = useMemo(
-        () => groups.find((g) => normalize(g.name) === q),
-        [groups, q],
+        () => groups.find((g) => g.name === typedName),
+        [groups, typedName],
     );
 
     // "Add group" is offered only for a non-empty name that doesn't exist yet.
-    const canCreate = q.length > 0 && !exactMatch;
+    const canCreate = typedName.length > 0 && !exactMatch;
 
     // Close the dropdown when clicking outside the widget.
     useEffect(() => {
@@ -83,34 +78,23 @@ export const GroupSelect = ({
         setOpen(true);
         setError(null);
         setNotice(null);
-        // The hidden id stays valid only while the text exactly matches an
-        // existing group; anything else means "nothing selected yet".
-        const match = groups.find((g) => normalize(g.name) === normalize(value));
+        const match = groups.find((g) => g.name === value.trim());
         setSelectedId(match ? match.id : '');
     };
 
     const create = () => {
-        const raw = query.trim();
-        if (!raw || isPending) return;
+        if (!typedName || isPending) return;
         setError(null);
         setNotice(null);
         startTransition(async () => {
-            const res = await groupCreateAction(raw);
+            const res = await groupCreateAction(typedName);
             if (res.error || !res.group) {
                 setError(res.error ?? 'Failed to create group');
                 return;
             }
             const group = res.group;
-            setNotice(
-                res.created
-                    ? `Group “${group.name}” created`
-                    : `Group “${group.name}” already exists — selected it`,
-            );
-            // Idempotent create: if it already existed (another manager won the
-            // race) the backend returns that row — merge it in and select it.
-            setGroups((prev) =>
-                prev.some((g) => g.id === group.id) ? prev : [...prev, group],
-            );
+            setNotice(`Group “${group.name}” created`);
+            setGroups((prev) => [...prev, group]);
             setSelectedId(group.id);
             setQuery(group.name);
             setOpen(false);
@@ -141,7 +125,7 @@ export const GroupSelect = ({
                     className={s.addBtn}
                     onClick={create}
                     disabled={!canCreate || isPending}
-                    title={canCreate ? `Create “${q}”` : 'Type a new group name to enable'}
+                    title={canCreate ? `Create “${typedName}”` : 'Type a new group name to enable'}
                 >
                     {isPending ? '…' : '+ Add group'}
                 </button>
@@ -166,7 +150,7 @@ export const GroupSelect = ({
                     )}
                     {canCreate && (
                         <li className={s.create} onMouseDown={(e) => { e.preventDefault(); create(); }}>
-                            + Create “{q}”
+                            + Create “{typedName}”
                         </li>
                     )}
                 </ul>

@@ -40,13 +40,13 @@
       "key": "user_id",
       "value": "1",
       "type": "string",
-      "description": "ID менеджера для detail/toggle/statistic-запитів."
+      "description": "ID менеджера для detail/activate/deactivate/ban/unban/statistic-запитів."
     },
     {
       "key": "group_name",
       "value": "group-2024-01",
       "type": "string",
-      "description": "Назва групи для Create Group (нормалізується .strip().lower())."
+      "description": "Назва групи для Create Group (обрізаються пробіли по краях, регістр зберігається)."
     },
     {
       "key": "task_id",
@@ -263,13 +263,13 @@
                 {
                   "key": "created_at_gte",
                   "value": "",
-                  "description": "Дата створення від (ISO 8601)",
+                  "description": "Дата створення від, включно (YYYY-MM-DD)",
                   "disabled": true
                 },
                 {
                   "key": "created_at_lte",
                   "value": "",
-                  "description": "Дата створення до (ISO 8601)",
+                  "description": "Дата створення до, включно весь день (YYYY-MM-DD)",
                   "disabled": true
                 },
                 {
@@ -396,13 +396,13 @@
                 {
                   "key": "created_at_gte",
                   "value": "",
-                  "description": "Дата створення від (ISO 8601)",
+                  "description": "Дата створення від, включно (YYYY-MM-DD)",
                   "disabled": true
                 },
                 {
                   "key": "created_at_lte",
                   "value": "",
-                  "description": "Дата створення до (ISO 8601)",
+                  "description": "Дата створення до, включно весь день (YYYY-MM-DD)",
                   "disabled": true
                 },
                 {
@@ -489,7 +489,7 @@
                 }
               }
             },
-            "description": "Створити нову групу. Назва нормалізується: `.strip().lower()`. Якщо група з такою назвою вже існує — повертається наявна (get_or_create)."
+            "description": "Створити нову групу (`201`). Пробіли по краях обрізаються, регістр зберігається. Назви унікальні з урахуванням регістру: `Group A` і `group a` — окремі групи; точний дубль — `400 {\"name\": [\"Group with this name already exists\"]}`."
           },
           "response": []
         },
@@ -545,7 +545,7 @@
                 }
               }
             },
-            "description": "Часткове оновлення заявки (PATCH). Усі поля необов'язкові.\n\nРедаговані поля: name, surname, email, phone, age, course, course_format, course_type, status, sum, already_paid, group.\n\nПравила:\n- Якщо заявка вже має менеджера і він відрізняється від поточного — `403 OrderPermissionDenied`.\n- Якщо `status=new` — менеджер знімається з заявки.\n- Якщо менеджера немає і статус не передано або поточний `new` — автоматично ставиться `in_work` і призначається поточний менеджер."
+            "description": "Часткове оновлення заявки (PATCH). Усі поля необов'язкові.\n\nРедаговані поля: name, surname, email, phone, age, course, course_format, course_type, status, sum, already_paid, group.\n\nВалідація (`400`, помилка по полю): name ≤ 25, surname ≤ 50, email ≤ 150, phone у форматі E.164 (`+380991122345`), age 1–100, sum/already_paid ≥ 0, already_paid ≤ sum (відсутня половина пари береться із заявки в БД).\n\nПравила:\n- Якщо заявка вже має менеджера і він відрізняється від поточного — `403 OrderPermissionDenied`.\n- Якщо `status=new` — менеджер знімається з заявки.\n- Якщо менеджера немає і статус не передано або поточний `new` — автоматично ставиться `in_work` і призначається поточний менеджер."
           },
           "response": []
         },
@@ -683,30 +683,58 @@
           "response": []
         },
         {
-          "name": "Toggle Active",
+          "name": "Activate User",
           "request": {
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/users/{{user_id}}/active_toggle",
+              "raw": "{{base_url}}/users/{{user_id}}/activate",
               "host": ["{{base_url}}"],
-              "path": ["users", "{{user_id}}", "active_toggle"]
+              "path": ["users", "{{user_id}}", "activate"]
             },
-            "description": "Перемкнути прапорець is_active менеджера (активний / неактивний). Тіло не потрібне. Потребує прав адміна."
+            "description": "Встановити is_active=true. Ідемпотентно: повторний виклик нічого не змінює й теж повертає 200. Тіло не потрібне. Потребує прав адміна."
           },
           "response": []
         },
         {
-          "name": "Toggle Ban",
+          "name": "Deactivate User",
           "request": {
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/users/{{user_id}}/ban_toggle",
+              "raw": "{{base_url}}/users/{{user_id}}/deactivate",
               "host": ["{{base_url}}"],
-              "path": ["users", "{{user_id}}", "ban_toggle"]
+              "path": ["users", "{{user_id}}", "deactivate"]
             },
-            "description": "Перемкнути прапорець is_banned менеджера (заблоковано / розблоковано). Тіло не потрібне. Потребує прав адміна."
+            "description": "Встановити is_active=false. Ідемпотентно. Тіло не потрібне. Потребує прав адміна; деактивувати себе не можна (403)."
+          },
+          "response": []
+        },
+        {
+          "name": "Ban User",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/ban",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "ban"]
+            },
+            "description": "Встановити is_banned=true. Ідемпотентно: повторний «бан» (стара вкладка, два адміни одночасно) лишає менеджера забаненим. Тіло не потрібне. Потребує прав адміна; забанити себе не можна (403)."
+          },
+          "response": []
+        },
+        {
+          "name": "Unban User",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/unban",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "unban"]
+            },
+            "description": "Встановити is_banned=false. Ідемпотентно. Тіло не потрібне. Потребує прав адміна."
           },
           "response": []
         },

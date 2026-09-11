@@ -12,7 +12,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin, BaseModel):
         db_table = 'auth_user'
         ordering = ['-id']
 
-    email = models.EmailField(unique=True)
+    email = models.EmailField(max_length=150, unique=True)
     name = models.CharField(max_length=20)
     surname = models.CharField(max_length=50, blank=True)
     is_active = models.BooleanField(default=False)

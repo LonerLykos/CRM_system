@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -22,6 +24,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(UserBaseSerializer):
     email = serializers.EmailField(
+        max_length=150,
         validators=[
             UniqueValidator(
                 queryset=UserModel.objects.all(),
@@ -32,6 +35,21 @@ class UserCreateSerializer(UserBaseSerializer):
 
     def create(self, validated_data):
         return UserModel.objects.create_user(**validated_data)
+
+
+class SetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+        min_length=8,
+        error_messages={'min_length': 'Password must be at least 8 characters'},
+        help_text='New password: at least 8 characters, not entirely numeric',
+    )
+
+    def validate_password(self, value):
+        if re.fullmatch(r'[0-9]+', value):
+            raise serializers.ValidationError('Password cannot be entirely numeric')
+        return value
 
 
 class UserResponseSerializer(UserBaseSerializer):

@@ -13,6 +13,7 @@ export interface ISearchParams {
     sum_eq?: string;
     already_paid_eq?: string;
     status?: string;
+    group?: string;
     group_name_contains?: string;
     created_at_lte?: string;
     created_at_gte?: string;

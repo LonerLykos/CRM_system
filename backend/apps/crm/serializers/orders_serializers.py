@@ -30,6 +30,36 @@ class OrderBaseSerializer(serializers.ModelSerializer):
             representation['group'] = instance.group.name
         return representation
 
+PHONE_REGEX = r'^\+[1-9]\d{7,14}$'
+
+
+class OrderUpdateSerializer(OrderBaseSerializer):
+
+    phone = serializers.RegexField(
+        PHONE_REGEX,
+        max_length=20,
+        required=False,
+        allow_null=True,
+        error_messages={'invalid': 'Invalid phone format'},
+    )
+    age = serializers.IntegerField(min_value=1, max_value=100, required=False, allow_null=True)
+    sum = serializers.FloatField(min_value=0, required=False, allow_null=True)
+    already_paid = serializers.FloatField(min_value=0, required=False, allow_null=True)
+
+    class Meta(OrderBaseSerializer.Meta):
+        fields = OrderBaseSerializer.Meta.fields
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if 'sum' in attrs or 'already_paid' in attrs:
+            total = attrs.get('sum', getattr(self.instance, 'sum', None))
+            paid = attrs.get('already_paid', getattr(self.instance, 'already_paid', None))
+            if total is not None and paid is not None and paid > total:
+                raise serializers.ValidationError(
+                    {'already_paid': 'Already paid cannot be greater than sum'}
+                )
+        return attrs
+
 
 class OrderListSerializer(OrderBaseSerializer):
     class Meta(OrderBaseSerializer.Meta):

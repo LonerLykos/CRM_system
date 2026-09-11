@@ -5,8 +5,8 @@ Endpoints covered:
 - GET  /users                   (list, admin-only)
 - POST /users/create_user       (admin-only)
 - GET  /users/<pk>              (admin-only)
-- PATCH /users/<pk>/active_toggle
-- PATCH /users/<pk>/ban_toggle
+- PATCH /users/<pk>/activate, /deactivate   (idempotent)
+- PATCH /users/<pk>/ban, /unban              (idempotent)
 - PATCH /users/<pk>/restore_password
 - POST /users/set_password/<token>   (AllowAny)
 """
@@ -25,8 +25,10 @@ USERS_CREATE_URL     = "/users/create_user"
 
 
 def user_detail_url(pk):     return f"/users/{pk}"
-def active_toggle_url(pk):   return f"/users/{pk}/active_toggle"
-def ban_toggle_url(pk):      return f"/users/{pk}/ban_toggle"
+def activate_url(pk):        return f"/users/{pk}/activate"
+def deactivate_url(pk):      return f"/users/{pk}/deactivate"
+def ban_url(pk):             return f"/users/{pk}/ban"
+def unban_url(pk):           return f"/users/{pk}/unban"
 def restore_pwd_url(pk):     return f"/users/{pk}/restore_password"
 def set_pwd_url(token):      return f"/users/set_password/{token}"
 
@@ -48,6 +50,16 @@ def active_target_user(db):
     return User.objects.create_user(
         email="atarget@test.com", name="ATarget", surname="User", is_active=True
     )
+
+
+@pytest.fixture
+def banned_target_user(db):
+    u = User.objects.create_user(
+        email="btarget@test.com", name="BTarget", surname="User", is_active=True
+    )
+    u.is_banned = True
+    u.save()
+    return u
 
 
 # ---------------------------------------------------------------------------
@@ -138,6 +150,27 @@ def test_create_user_duplicate_email_creates_no_second_row(admin_client, target_
     assert User.objects.filter(email=target_user.email).count() == 1
 
 
+# An email of exactly 150 characters: 64 + "@" + 85-char domain
+EMAIL_150 = "a" * 64 + "@" + "b" * 63 + "." + "c" * 17 + ".com"
+EMAIL_151 = "a" * 64 + "@" + "b" * 63 + "." + "c" * 18 + ".com"
+
+
+@pytest.mark.django_db
+def test_create_user_email_of_150_chars_is_accepted(admin_client):
+    payload = {"email": EMAIL_150, "name": "Long", "surname": "Mail"}
+    resp = admin_client.post(USERS_CREATE_URL, payload, format="json")
+    assert resp.status_code == 201
+
+
+@pytest.mark.django_db
+def test_create_user_email_longer_than_150_returns_400(admin_client):
+    payload = {"email": EMAIL_151, "name": "Long", "surname": "Mail"}
+    resp = admin_client.post(USERS_CREATE_URL, payload, format="json")
+    assert resp.status_code == 400
+    assert "email" in resp.json()
+    assert not User.objects.filter(email=EMAIL_151).exists()
+
+
 # ---------------------------------------------------------------------------
 # GET /users/<pk> — detail
 # ---------------------------------------------------------------------------
@@ -156,37 +189,95 @@ def test_user_detail_manager_403(manager_client, target_user):
 
 
 # ---------------------------------------------------------------------------
-# PATCH /users/<pk>/active_toggle
+# PATCH /users/<pk>/activate  and  /deactivate
 # ---------------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_active_toggle_inverts_state(admin_client, target_user):
+def test_activate_sets_active(admin_client, target_user):
     assert target_user.is_active is False
-    resp = admin_client.patch(active_toggle_url(target_user.pk))
+    resp = admin_client.patch(activate_url(target_user.pk))
+    assert resp.status_code == 200
+    assert resp.json()["is_active"] is True
+    target_user.refresh_from_db()
+    assert target_user.is_active is True
+
+
+@pytest.mark.django_db
+def test_activate_twice_keeps_user_active(admin_client, target_user):
+    admin_client.patch(activate_url(target_user.pk))
+    resp = admin_client.patch(activate_url(target_user.pk))
     assert resp.status_code == 200
     target_user.refresh_from_db()
     assert target_user.is_active is True
 
 
 @pytest.mark.django_db
-def test_active_toggle_second_call_reverts(admin_client, target_user):
-    admin_client.patch(active_toggle_url(target_user.pk))
-    admin_client.patch(active_toggle_url(target_user.pk))
-    target_user.refresh_from_db()
-    assert target_user.is_active is False
+def test_deactivate_sets_inactive(admin_client, active_target_user):
+    resp = admin_client.patch(deactivate_url(active_target_user.pk))
+    assert resp.status_code == 200
+    active_target_user.refresh_from_db()
+    assert active_target_user.is_active is False
+
+
+@pytest.mark.django_db
+def test_deactivate_twice_keeps_user_inactive(admin_client, active_target_user):
+    admin_client.patch(deactivate_url(active_target_user.pk))
+    resp = admin_client.patch(deactivate_url(active_target_user.pk))
+    assert resp.status_code == 200
+    active_target_user.refresh_from_db()
+    assert active_target_user.is_active is False
 
 
 # ---------------------------------------------------------------------------
-# PATCH /users/<pk>/ban_toggle
+# PATCH /users/<pk>/ban  and  /unban
 # ---------------------------------------------------------------------------
 
 @pytest.mark.django_db
-def test_ban_toggle_inverts_state(admin_client, target_user):
+def test_ban_sets_banned(admin_client, target_user):
     assert target_user.is_banned is False
-    resp = admin_client.patch(ban_toggle_url(target_user.pk))
+    resp = admin_client.patch(ban_url(target_user.pk))
+    assert resp.status_code == 200
+    assert resp.json()["is_banned"] is True
+    target_user.refresh_from_db()
+    assert target_user.is_banned is True
+
+
+@pytest.mark.django_db
+def test_ban_twice_keeps_user_banned(admin_client, target_user):
+    """
+    A second "Ban" (stale tab, two admins at once) must not unban the user —
+    the bug the old ban_toggle had.
+    """
+    admin_client.patch(ban_url(target_user.pk))
+    resp = admin_client.patch(ban_url(target_user.pk))
     assert resp.status_code == 200
     target_user.refresh_from_db()
     assert target_user.is_banned is True
+
+
+@pytest.mark.django_db
+def test_unban_clears_banned(admin_client, banned_target_user):
+    resp = admin_client.patch(unban_url(banned_target_user.pk))
+    assert resp.status_code == 200
+    assert resp.json()["is_banned"] is False
+    banned_target_user.refresh_from_db()
+    assert banned_target_user.is_banned is False
+
+
+@pytest.mark.django_db
+def test_unban_twice_keeps_user_unbanned(admin_client, banned_target_user):
+    admin_client.patch(unban_url(banned_target_user.pk))
+    resp = admin_client.patch(unban_url(banned_target_user.pk))
+    assert resp.status_code == 200
+    banned_target_user.refresh_from_db()
+    assert banned_target_user.is_banned is False
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("suffix", ["ban_toggle", "active_toggle"])
+def test_old_toggle_endpoints_are_gone(admin_client, target_user, suffix):
+    resp = admin_client.patch(f"/users/{target_user.pk}/{suffix}")
+    assert resp.status_code == 404
 
 
 @pytest.mark.django_db
@@ -199,7 +290,7 @@ def test_admin_cannot_ban_self_returns_403():
     client = APIClient()
     client.force_authenticate(user=admin)
 
-    resp = client.patch(ban_toggle_url(admin.pk))
+    resp = client.patch(ban_url(admin.pk))
 
     assert resp.status_code == 403
     admin.refresh_from_db()
@@ -208,14 +299,14 @@ def test_admin_cannot_ban_self_returns_403():
 
 @pytest.mark.django_db
 def test_admin_cannot_deactivate_self_returns_403():
-    """Same guard for active_toggle — an admin can't deactivate themselves."""
+    """Same guard for deactivate — an admin can't deactivate themselves."""
     admin = User.objects.create_superuser(
         email="selfdeact@test.com", password="pass", name="Self", surname="Deact"
     )
     client = APIClient()
     client.force_authenticate(user=admin)
 
-    resp = client.patch(active_toggle_url(admin.pk))
+    resp = client.patch(deactivate_url(admin.pk))
 
     assert resp.status_code == 403
     admin.refresh_from_db()
@@ -277,8 +368,61 @@ def test_set_password_response_contains_tokens_and_cookie(db, target_user):
 def test_set_password_invalid_token_returns_401(db, target_user):
     """Expired / invalid token → JWTException → 401."""
     client = APIClient()
-    resp = client.post(set_pwd_url("invalid.token.here"), {"password": "X"}, format="json")
+    resp = client.post(set_pwd_url("invalid.token.here"), {"password": "Str0ngPass!"}, format="json")
     assert resp.status_code == 401
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("password, message", [
+    ("1", "Password must be at least 8 characters"),
+    ("abc1234", "Password must be at least 8 characters"),
+    ("12345678", "Password cannot be entirely numeric"),
+])
+def test_set_password_rejects_weak_password(db, target_user, password, message):
+    """Same rules as the frontend form: 8+ characters, not entirely numeric."""
+    token, _ = UserService.user_restore_password(target_user.pk)
+    client = APIClient()
+    resp = client.post(set_pwd_url(str(token)), {"password": password}, format="json")
+
+    assert resp.status_code == 400
+    assert resp.json() == {"password": [message]}
+    target_user.refresh_from_db()
+    assert target_user.is_active is False
+    assert not target_user.has_usable_password()
+
+
+@pytest.mark.django_db
+def test_set_password_missing_password_returns_400(db, target_user):
+    """
+    Without a password the account used to be activated with an unusable
+    password; now the request is rejected and nothing changes.
+    """
+    token, _ = UserService.user_restore_password(target_user.pk)
+    client = APIClient()
+    resp = client.post(set_pwd_url(str(token)), {}, format="json")
+
+    assert resp.status_code == 400
+    assert "password" in resp.json()
+    target_user.refresh_from_db()
+    assert target_user.is_active is False
+
+
+@pytest.mark.django_db
+def test_set_password_rejected_password_does_not_burn_token(db, target_user):
+    """
+    Validation runs before the token is verified (and blacklisted), so the
+    manager can retry the same activation link with a valid password.
+    """
+    token, _ = UserService.user_restore_password(target_user.pk)
+    client = APIClient()
+
+    rejected = client.post(set_pwd_url(str(token)), {"password": "1"}, format="json")
+    retried = client.post(set_pwd_url(str(token)), {"password": "Str0ngPass!"}, format="json")
+
+    assert rejected.status_code == 400
+    assert retried.status_code == 200
+    target_user.refresh_from_db()
+    assert target_user.check_password("Str0ngPass!")
 
 
 @pytest.mark.django_db

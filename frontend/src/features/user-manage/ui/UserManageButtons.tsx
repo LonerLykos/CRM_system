@@ -1,7 +1,7 @@
 'use client'
 
 import {useState, useTransition} from "react";
-import {banToggleAction, restorePasswordAction} from "@/features/user-manage";
+import {banUserAction, restorePasswordAction, unbanUserAction} from "@/features/user-manage";
 import s from "./UserManageButtons.module.sass";
 
 interface UserManageButtonsProps {
@@ -40,10 +40,10 @@ export const UserManageButtons = ({pk, isActive, isBanned, isSelf}: UserManageBu
         });
     };
 
-    const handleBanToggle = () => {
+    const handleBanChange = () => {
         setErrorMsg(null);
         startTransition(async () => {
-            const result = await banToggleAction(pk);
+            const result = isBanned ? await unbanUserAction(pk) : await banUserAction(pk);
             if (!result.ok) {
                 setErrorMsg(result.error);
             }
@@ -75,7 +75,7 @@ export const UserManageButtons = ({pk, isActive, isBanned, isSelf}: UserManageBu
             <button
                 className={`${s.btn} ${isBanned ? s.unban : s.ban}`}
                 disabled={isPending || isSelf}
-                onClick={handleBanToggle}
+                onClick={handleBanChange}
                 title={isSelf ? 'You cannot ban your own account' : undefined}
             >
                 {isPending ? '…' : isBanned ? 'Unban' : 'Ban'}

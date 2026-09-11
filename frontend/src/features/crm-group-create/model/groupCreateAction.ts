@@ -7,7 +7,6 @@ import {groupCreateSchema} from "./groupCreateSchema";
 
 export interface GroupCreateResult {
     group?: IGroupResponse;
-    created?: boolean;
     error?: string;
 }
 
@@ -22,7 +21,7 @@ export async function groupCreateAction(name: string): Promise<GroupCreateResult
 
     if (ok) {
         revalidatePath('/crm');
-        return {group: result ?? undefined, created: status === 201};
+        return {group: result ?? undefined};
     }
 
     if (status === 500) {

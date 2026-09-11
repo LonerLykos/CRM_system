@@ -2,6 +2,7 @@
 
 import {revalidatePath} from "next/cache";
 import {userService} from "@/entities/user";
+import {extractApiError} from "@/shared/libs";
 
 export type UserManageActionResult = {
     ok: true;
@@ -12,8 +13,10 @@ export type UserManageActionResult = {
     error: string;
 };
 
-export async function banToggleAction(pk: number): Promise<UserManageActionResult> {
-    const {ok, error, status} = await userService.banToggle(pk);
+async function setBanned(pk: number, banned: boolean): Promise<UserManageActionResult> {
+    const {ok, error, status} = banned
+        ? await userService.ban(pk)
+        : await userService.unban(pk);
 
     if (ok) {
         revalidatePath('/users');
@@ -21,8 +24,15 @@ export async function banToggleAction(pk: number): Promise<UserManageActionResul
     }
 
     if (status === 500) return {ok: false, error: 'Server error'};
-    if (error && 'detail' in error && error.detail) return {ok: false, error: error.detail};
-    return {ok: false, error: 'Action failed'};
+    return {ok: false, error: extractApiError(error, 'Action failed')};
+}
+
+export async function banUserAction(pk: number): Promise<UserManageActionResult> {
+    return setBanned(pk, true);
+}
+
+export async function unbanUserAction(pk: number): Promise<UserManageActionResult> {
+    return setBanned(pk, false);
 }
 
 export async function restorePasswordAction(pk: number): Promise<UserManageActionResult> {
@@ -34,6 +44,5 @@ export async function restorePasswordAction(pk: number): Promise<UserManageActio
     }
 
     if (status === 500) return {ok: false, error: 'Server error'};
-    if (error && 'detail' in error && error.detail) return {ok: false, error: error.detail};
-    return {ok: false, error: 'Action failed'};
+    return {ok: false, error: extractApiError(error, 'Action failed')};
 }

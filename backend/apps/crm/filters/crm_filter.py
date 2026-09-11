@@ -1,7 +1,16 @@
+from datetime import datetime, time, timedelta
+
+from django.db.models.functions import Lower
+from django.utils import timezone
 from django_filters import rest_framework as filters
 
 from apps.crm.models.group_model import GroupModel
 from apps.crm.models.orders_model import CoursesChoices, CoursesFormatChoices, CoursesTypeChoices, StatusChoices
+from apps.crm.selectors.order_selectors import new_status_q
+
+
+def _start_of_day(day):
+    return timezone.make_aware(datetime.combine(day, time.min))
 
 
 class OrderFilter(filters.FilterSet):
@@ -15,11 +24,11 @@ class OrderFilter(filters.FilterSet):
     course_format = filters.ChoiceFilter('course_format', choices=CoursesFormatChoices.choices)
     sum_eq = filters.NumberFilter(field_name='sum', lookup_expr='exact')
     already_paid_eq = filters.NumberFilter(field_name='already_paid', lookup_expr='exact')
-    status = filters.ChoiceFilter('status', choices=StatusChoices.choices)
+    status = filters.ChoiceFilter('status', choices=StatusChoices.choices, method='filter_status')
     group = filters.ModelChoiceFilter(field_name='group', queryset=GroupModel.objects.all())
-    group_name_contains = filters.CharFilter(field_name='group__name', lookup_expr='icontains')
-    created_at_lte = filters.DateTimeFilter(field_name='created_at', lookup_expr='lte')
-    created_at_gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
+    group_name_contains = filters.CharFilter(field_name='group__name', method='filter_group_name')
+    created_at_lte = filters.DateFilter(field_name='created_at', method='filter_created_to')
+    created_at_gte = filters.DateFilter(field_name='created_at', method='filter_created_from')
     my = filters.BooleanFilter(method='filter_my_orders')
     order = filters.OrderingFilter(
         fields=(
@@ -40,6 +49,22 @@ class OrderFilter(filters.FilterSet):
             ('manager__surname', 'manager'),
         )
     )
+
+    def filter_status(self, queryset, name, value):
+        if value == StatusChoices.NEW:
+            return queryset.filter(new_status_q())
+        return queryset.filter(status=value)
+
+    def filter_group_name(self, queryset, name, value):
+        return queryset.alias(group_name_lower=Lower('group__name')).filter(
+            group_name_lower__contains=value.lower()
+        )
+
+    def filter_created_from(self, queryset, name, value):
+        return queryset.filter(created_at__gte=_start_of_day(value))
+
+    def filter_created_to(self, queryset, name, value):
+        return queryset.filter(created_at__lt=_start_of_day(value + timedelta(days=1)))
 
     def filter_my_orders(self, queryset, name, value):
         request = self.request

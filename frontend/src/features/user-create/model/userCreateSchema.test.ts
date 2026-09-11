@@ -53,6 +53,26 @@ describe('userCreateSchema', () => {
       const result = userCreateSchema.safeParse({ email: '', name: 'John', surname: 'Doe' })
       expect(result.success).toBe(false)
     })
+
+    // 64 + "@" + 85-char domain = exactly 150 characters
+    const email150 = 'a'.repeat(64) + '@' + 'b'.repeat(63) + '.' + 'c'.repeat(17) + '.com'
+    const email151 = 'a'.repeat(64) + '@' + 'b'.repeat(63) + '.' + 'c'.repeat(18) + '.com'
+
+    it('accepts email of exactly 150 characters', () => {
+      expect(email150).toHaveLength(150)
+      const result = userCreateSchema.safeParse({ email: email150, name: 'John', surname: 'Doe' })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects email longer than 150 characters', () => {
+      expect(email151).toHaveLength(151)
+      const result = userCreateSchema.safeParse({ email: email151, name: 'John', surname: 'Doe' })
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const err = result.error.issues.find(i => i.path[0] === 'email')
+        expect(err?.message).toBe('Email max 150 chars')
+      }
+    })
   })
 
   describe('name validation', () => {

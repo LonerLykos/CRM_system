@@ -14,8 +14,11 @@ export const userService = {
             body,
         ),
 
-    banToggle: (pk: number) =>
-        api.patch<IUser, Record<string, never>>(`${BASE}/${pk}/ban_toggle`, {}),
+    ban: (pk: number) =>
+        api.patch<IUser, Record<string, never>>(`${BASE}/${pk}/ban`, {}),
+
+    unban: (pk: number) =>
+        api.patch<IUser, Record<string, never>>(`${BASE}/${pk}/unban`, {}),
 
     restorePassword: (pk: number) =>
         api.patch<IUserActionLinkResponse, Record<string, never>>(

@@ -35,7 +35,7 @@ class OrderService:
             if not data.get("status") or (data.get("status") and data["status"] != StatusChoices.NEW):
                 order.manager = self.user
                 updated_fields.add('manager')
-            if not data.get("status") and order.status in [None, 'new']:
+            if not data.get("status") and order.status in [None, '', StatusChoices.NEW]:
                 order.status = 'in_work'
                 updated_fields.add('status')
 

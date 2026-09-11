@@ -54,6 +54,20 @@ def test_null_status_counted_in_new():
 
 
 @pytest.mark.django_db
+def test_blank_status_counted_in_new():
+    """
+    An empty-string status is "no status" too and is counted under 'new' —
+    the same rule the ?status=new filter applies.
+    """
+    selector = OrderSelector()
+    new_before = selector.get_status_stats()["new"]
+
+    OrdersModel.objects.create(name="BlankOrder", status="")
+
+    assert selector.get_status_stats()["new"] == new_before + 1
+
+
+@pytest.mark.django_db
 def test_manager_filter_isolates_stats(manager_user):
     """
     get_status_stats(manager_id=X) returns counts only for orders

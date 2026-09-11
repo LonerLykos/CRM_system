@@ -16,27 +16,30 @@ class UserService:
         return token, user
 
     @classmethod
-    @transaction.atomic
-    def user_active_toggle(cls, user_id, requester_id=None):
+    def _get_other_user(cls, user_id, requester_id=None):
         if requester_id is not None and str(user_id) == str(requester_id):
             raise SelfActionDenied()
         current_user = cls.user_selector.get_by_id(user_id)
         if not current_user:
             raise UserNotFound()
-        current_user.is_active = not current_user.is_active
-        current_user.save()
         return current_user
 
     @classmethod
     @transaction.atomic
-    def user_ban_toggle(cls, user_id, requester_id=None):
-        if requester_id is not None and str(user_id) == str(requester_id):
-            raise SelfActionDenied()
-        current_user = cls.user_selector.get_by_id(user_id)
-        if not current_user:
-            raise UserNotFound()
-        current_user.is_banned = not current_user.is_banned
-        current_user.save()
+    def set_active(cls, user_id, is_active: bool, requester_id=None):
+        current_user = cls._get_other_user(user_id, requester_id)
+        if current_user.is_active != is_active:
+            current_user.is_active = is_active
+            current_user.save()
+        return current_user
+
+    @classmethod
+    @transaction.atomic
+    def set_banned(cls, user_id, is_banned: bool, requester_id=None):
+        current_user = cls._get_other_user(user_id, requester_id)
+        if current_user.is_banned != is_banned:
+            current_user.is_banned = is_banned
+            current_user.save()
         return current_user
 
     @classmethod

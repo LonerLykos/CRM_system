@@ -2,7 +2,7 @@
 
 import {commentSchema} from "@/features/comment-create";
 import {redirect} from "next/navigation";
-import {rebuildParams} from "@/shared/libs";
+import {extractApiError, rebuildParams} from "@/shared/libs";
 import {commentService} from "@/entities/comment";
 import {ISearchParams} from "@/shared/model";
 import {revalidatePath} from "next/cache";
@@ -33,24 +33,10 @@ export async function commentAction(formData: FormData) {
             redirect(`/crm?${rebuildParams(params, {error: ''})}`)
         }
 
-        if (!ok) {
-            if (status === 500) {
-                redirect(`/crm?${rebuildParams(
-                    params,
-                    {error: 'The server is not responding'}
-                )}`)
-            } else if ('detail' in error) {
-                redirect(`/crm?${rebuildParams(
-                    params,
-                    {error: error.detail as string}
-                )}`)
-            } else if ('statusText' in error) {
-                redirect(`/crm?${rebuildParams(
-                    params,
-                    {error: error.statusText as string}
-                )}`)
-            }
-        }
+        const errorMsg = status === 500
+            ? 'The server is not responding'
+            : extractApiError(error, 'Failed to add comment')
+        redirect(`/crm?${rebuildParams(params, {error: errorMsg})}`)
     } else {
         redirect(`/crm?${rebuildParams(
             params,

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { ISearchParams } from '@/shared/model';
+import { filterSet } from '@/features/order-filter/config/filterSet';
 
 interface ExportButtonProps {
     params: ISearchParams;
@@ -9,21 +10,7 @@ interface ExportButtonProps {
 }
 
 const EXPORT_FILTER_KEYS: ReadonlyArray<keyof ISearchParams> = [
-    'name_contains',
-    'surname_contains',
-    'email_contains',
-    'phone_contains',
-    'age_eq',
-    'course',
-    'course_type',
-    'course_format',
-    'sum_eq',
-    'already_paid_eq',
-    'status',
-    'group_name_contains',
-    'created_at_lte',
-    'created_at_gte',
-    'my',
+    ...filterSet.map(({ key }) => key),
     'order',
 ];
 

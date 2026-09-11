@@ -3,6 +3,7 @@ import {zod} from "@/shared/libs";
 
 export const commentSchema = zod.object({
     comment: zod.string()
+        .trim()
         .min(1, 'The comment must have at least 1 characters')
 });
 

@@ -31,8 +31,8 @@ class OrdersModel(BaseModel):
         ordering = ['-id']
 
     name = models.CharField(max_length=25, blank=True, null=True)
-    surname = models.CharField(max_length=25, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+    surname = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(max_length=150, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
     course = models.CharField(

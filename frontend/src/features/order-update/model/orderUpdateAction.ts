@@ -1,14 +1,23 @@
 'use server'
 
 import {ISearchParams} from "@/shared/model";
-import {orderUpdateSchema} from "@/features/order-update";
 import {redirect} from "next/navigation";
-import {rebuildParams} from "@/shared/libs";
+import {extractApiError, rebuildParams} from "@/shared/libs";
 import {orderService} from "@/entities/order";
 import {revalidatePath} from "next/cache";
+import {orderUpdateSchema} from "./orderUpdateSchema";
 
 
-export async function orderUpdateAction(formData: FormData) {
+export type OrderUpdateState = {
+    error: string;
+    values: Record<string, string>;
+    attempt: number;
+} | null;
+
+export async function orderUpdateAction(
+    prevState: OrderUpdateState,
+    formData: FormData,
+): Promise<OrderUpdateState> {
     const rawParams = formData.get('params')
     const params: ISearchParams = (typeof rawParams === 'string')
         ? JSON.parse(rawParams)
@@ -23,6 +32,17 @@ export async function orderUpdateAction(formData: FormData) {
         : {}
 
     const rawData = Object.fromEntries(formData.entries())
+
+    const values: Record<string, string> = {}
+    for (const [key, value] of Object.entries(rawData)) {
+        values[key] = String(value)
+    }
+
+    const fail = (error: string): OrderUpdateState => ({
+        error,
+        values,
+        attempt: (prevState?.attempt ?? 0) + 1,
+    })
 
     // True PATCH: keep only the fields the manager actually changed. Untouched
     // fields — including possibly-malformed legacy data (e.g. an old phone) —
@@ -45,7 +65,7 @@ export async function orderUpdateAction(formData: FormData) {
     }
 
     if (!params.update_order) {
-        redirect(`/crm?${rebuildParams(params, {error: 'No order selected for update'})}`)
+        return fail('No order selected for update')
     }
 
     // Nothing changed — close the modal without a pointless request.
@@ -56,29 +76,21 @@ export async function orderUpdateAction(formData: FormData) {
     const validatedFields = orderUpdateSchema.safeParse(changed)
 
     if (!validatedFields.success) {
-        const errorMsg = validatedFields.error.issues[0].message
-        redirect(`/crm?${rebuildParams(params, {error: errorMsg})}`)
+        return fail(validatedFields.error.issues[0].message)
     }
 
     const {ok, status, error} = await orderService.updateOrder(
-        params.update_order!,
+        params.update_order,
         validatedFields.data,
     )
 
-    if (ok) {
-        revalidatePath('/crm')
-        redirect(`/crm?${rebuildParams(params, {update_order: ''})}`)
-    }
-
     if (!ok) {
         if (status === 500) {
-            redirect(`/crm?${rebuildParams(params, {error: 'The server is not responding'})}`)
-        } else if (error && 'detail' in error) {
-            redirect(`/crm?${rebuildParams(params, {error: error.detail as string})}`)
-        } else if (error && 'statusText' in error) {
-            redirect(`/crm?${rebuildParams(params, {error: error.statusText as string})}`)
-        } else {
-            redirect(`/crm?${rebuildParams(params, {error: 'Update failed'})}`)
+            return fail('The server is not responding')
         }
+        return fail(extractApiError(error, 'Update failed'))
     }
+
+    revalidatePath('/crm')
+    redirect(`/crm?${rebuildParams(params, {update_order: '', error: ''})}`)
 }

@@ -4,6 +4,7 @@ import {redirect} from 'next/navigation'
 import {setPasswordSchema} from "@/features/user-set-password";
 import {api, ITokenPair} from "@/shared/api";
 import {urls} from "@/shared/config";
+import {extractApiError} from "@/shared/libs";
 
 
 export async function setPasswordAction(token: string, formData: FormData) {
@@ -23,18 +24,11 @@ export async function setPasswordAction(token: string, formData: FormData) {
     )
 
     if (ok) {
-        // Per TZ: after setting the password the manager logs in explicitly.
-        // No auto-login here — redirect to the login page.
         redirect('/auth')
     }
 
-    if (!ok) {
-        if (status === 500) {
-            redirect(`/set-password/${token}?error=${encodeURIComponent('The server is not responding')}`)
-        } else if ('detail' in error) {
-            redirect(`/set-password/${token}?error=${encodeURIComponent(error.detail as string)}`)
-        } else if ('statusText' in error) {
-            redirect(`/set-password/${token}?error=${encodeURIComponent(error.statusText as string)}`)
-        }
-    }
+    const errorMsg = status === 500
+        ? 'The server is not responding'
+        : extractApiError(error, 'Failed to set password')
+    redirect(`/set-password/${token}?error=${encodeURIComponent(errorMsg)}`)
 }

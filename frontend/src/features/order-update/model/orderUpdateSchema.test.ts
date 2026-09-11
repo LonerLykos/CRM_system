@@ -53,7 +53,7 @@ describe('orderUpdateSchema', () => {
     })
   })
 
-  describe('surname validation', () => {
+  describe('surname validation (same 50-char limit as the database)', () => {
     it('rejects surname longer than 50 characters', () => {
       const result = orderUpdateSchema.safeParse({ surname: 'B'.repeat(51) })
       expect(result.success).toBe(false)
@@ -71,6 +71,10 @@ describe('orderUpdateSchema', () => {
   })
 
   describe('email validation', () => {
+    // 64 + "@" + 85-char domain = exactly 150 characters
+    const email150 = 'a'.repeat(64) + '@' + 'b'.repeat(63) + '.' + 'c'.repeat(17) + '.com'
+    const email151 = 'a'.repeat(64) + '@' + 'b'.repeat(63) + '.' + 'c'.repeat(18) + '.com'
+
     it('rejects invalid email', () => {
       const result = orderUpdateSchema.safeParse({ email: 'not-an-email' })
       expect(result.success).toBe(false)
@@ -83,6 +87,22 @@ describe('orderUpdateSchema', () => {
     it('accepts valid email', () => {
       const result = orderUpdateSchema.safeParse({ email: 'valid@test.com' })
       expect(result.success).toBe(true)
+    })
+
+    it('accepts email exactly 150 characters', () => {
+      expect(email150).toHaveLength(150)
+      const result = orderUpdateSchema.safeParse({ email: email150 })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects email longer than 150 characters', () => {
+      expect(email151).toHaveLength(151)
+      const result = orderUpdateSchema.safeParse({ email: email151 })
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const err = result.error.issues.find(i => i.path[0] === 'email')
+        expect(err?.message).toBe('The email must be at most 150 characters')
+      }
     })
   })
 

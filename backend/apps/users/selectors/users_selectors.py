@@ -2,6 +2,7 @@ from core.selectors import BaseSelector
 from django.db.models import Count, Q
 
 from apps.crm.models.choices_models import StatusChoices
+from apps.crm.selectors.order_selectors import new_status_q
 from apps.users.models import UserModel
 
 
@@ -11,10 +12,7 @@ class UsersSelector(BaseSelector[UserModel]):
     def get_queryset_with_stats(self):
         return self.model.objects.annotate(
             stat_total=Count('orders'),
-            stat_new=Count(
-                'orders',
-                filter=Q(orders__status=StatusChoices.NEW) | Q(orders__status__isnull=True),
-            ),
+            stat_new=Count('orders', filter=new_status_q('orders__')),
             stat_in_work=Count('orders', filter=Q(orders__status=StatusChoices.IN_WORK)),
             stat_agree=Count('orders', filter=Q(orders__status=StatusChoices.AGREE)),
             stat_disagree=Count('orders', filter=Q(orders__status=StatusChoices.DISAGREE)),

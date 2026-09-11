@@ -5,6 +5,15 @@ from apps.crm.models.choices_models import StatusChoices
 from apps.crm.models.orders_model import OrdersModel
 
 
+def new_status_q(prefix: str = '') -> Q:
+    field = f'{prefix}status'
+    return (
+        Q(**{field: StatusChoices.NEW})
+        | Q(**{f'{field}__isnull': True})
+        | Q(**{field: ''})
+    )
+
+
 class OrderSelector(BaseSelector[OrdersModel]):
     model = OrdersModel
 
@@ -15,9 +24,9 @@ class OrderSelector(BaseSelector[OrdersModel]):
         return self.model.objects.for_detail().filter(pk=pk).first()
 
     def get_status_stats(self, manager_id: int | None = None) -> dict:
-        """Aggregated order counts by status. status=None is folded into 'new'
-        (business rule: None/'new' are equivalent, see OrderService)."""
-        
+        """Aggregated order counts by status. An empty status is folded into 'new'
+        (business rule: empty/'new' are equivalent, see new_status_q)."""
+
         qs = self.model.objects.all()
 
         if manager_id is not None:
@@ -25,8 +34,7 @@ class OrderSelector(BaseSelector[OrdersModel]):
 
         aggregation = qs.aggregate(
             total=Count('id'),
-            # null status rows are treated as 'new'
-            new=Count('id', filter=Q(status=StatusChoices.NEW) | Q(status__isnull=True)),
+            new=Count('id', filter=new_status_q()),
             in_work=Count('id', filter=Q(status=StatusChoices.IN_WORK)),
             agree=Count('id', filter=Q(status=StatusChoices.AGREE)),
             disagree=Count('id', filter=Q(status=StatusChoices.DISAGREE)),

@@ -7,9 +7,9 @@ Covers:
 - IsUnbannedUser: banned users are blocked (403)
 
 Note on banned-admin test:
-  All admin-user endpoints (list, create, toggles, etc.) require
-  [IsAdminUser, IsActiveUser, IsUnbannedUser].  A banned admin IS
-  blocked by IsUnbannedUser.  We verify this on PATCH /users/<pk>/active_toggle
+  All admin-user endpoints (list, create, activate/deactivate, ban/unban, etc.)
+  require [IsAdminUser, IsActiveUser, IsUnbannedUser].  A banned admin IS
+  blocked by IsUnbannedUser.  We verify this on PATCH /users/<pk>/activate
   which is representative of all admin-only write endpoints.
 """
 import pytest
@@ -19,9 +19,10 @@ from apps.users.models import UserModel as User
 USERS_LIST_URL = "/users"
 USERS_CREATE_URL = "/users/create_user"
 
+STATE_ACTIONS = ("activate", "deactivate", "ban", "unban")
 
-def active_toggle_url(pk): return f"/users/{pk}/active_toggle"
-def ban_toggle_url(pk):    return f"/users/{pk}/ban_toggle"
+
+def activate_url(pk): return f"/users/{pk}/activate"
 
 
 # ---------------------------------------------------------------------------
@@ -84,14 +85,9 @@ def test_non_admin_cannot_create_user(manager_client):
 
 
 @pytest.mark.django_db
-def test_non_admin_cannot_toggle_active(manager_client, target_user):
-    resp = manager_client.patch(active_toggle_url(target_user.pk))
-    assert resp.status_code == 403
-
-
-@pytest.mark.django_db
-def test_non_admin_cannot_toggle_ban(manager_client, target_user):
-    resp = manager_client.patch(ban_toggle_url(target_user.pk))
+@pytest.mark.parametrize("action", STATE_ACTIONS)
+def test_non_admin_cannot_change_user_state(manager_client, target_user, action):
+    resp = manager_client.patch(f"/users/{target_user.pk}/{action}")
     assert resp.status_code == 403
 
 
@@ -107,9 +103,9 @@ def test_inactive_admin_blocked_on_list(inactive_admin, api_client):
 
 
 @pytest.mark.django_db
-def test_inactive_admin_blocked_on_active_toggle(inactive_admin, api_client, target_user):
+def test_inactive_admin_blocked_on_activate(inactive_admin, api_client, target_user):
     api_client.force_authenticate(user=inactive_admin)
-    resp = api_client.patch(active_toggle_url(target_user.pk))
+    resp = api_client.patch(activate_url(target_user.pk))
     assert resp.status_code == 403
 
 
@@ -125,9 +121,9 @@ def test_banned_admin_blocked_on_list(banned_admin, api_client):
 
 
 @pytest.mark.django_db
-def test_banned_admin_blocked_on_active_toggle(banned_admin, api_client, target_user):
+def test_banned_admin_blocked_on_activate(banned_admin, api_client, target_user):
     api_client.force_authenticate(user=banned_admin)
-    resp = api_client.patch(active_toggle_url(target_user.pk))
+    resp = api_client.patch(activate_url(target_user.pk))
     assert resp.status_code == 403
 
 
