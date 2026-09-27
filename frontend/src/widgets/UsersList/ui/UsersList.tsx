@@ -1,5 +1,5 @@
 import {IUser} from "@/entities/user";
-import {authService} from "@/entities/auth";
+import {getCurrentUser} from "@/entities/auth";
 import {UserCard} from "./UserCard";
 import s from "./UsersList.module.sass";
 
@@ -14,7 +14,7 @@ export const UsersList = async ({users}: UsersListProps) => {
 
     // Fetched once for the whole list so each card knows whether it is the
     // logged-in user (self) — used to lock the self Ban button.
-    const {result: me} = await authService.getMe();
+    const {result: me} = await getCurrentUser();
 
     return (
         <div className={s.grid}>

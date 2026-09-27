@@ -1,6 +1,6 @@
 import Link from "next/link";
 import styles from "./Menu.module.sass"
-import {AdminLink, authService, UserAvatar} from "@/entities/auth";
+import {AdminLink, getCurrentUser, UserAvatar} from "@/entities/auth";
 import {LogoutButton} from "@/features/auth-logout";
 import {ThemeToggle} from "@/features/theme-toggle";
 import Image from "next/image";
@@ -8,7 +8,7 @@ import Image from "next/image";
 
 export const Menu = async () => {
 
-    const {ok, status, result, error} = await authService.getMe()
+    const {ok, status, result} = await getCurrentUser()
     if (!ok) {
         return status === 500 ? (<div>Server Error</div>) : <></>
     }

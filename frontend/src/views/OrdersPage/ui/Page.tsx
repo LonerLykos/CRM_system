@@ -5,6 +5,7 @@ import {Pagination} from "@/shared/ui";
 import {ISearchParams} from "@/shared/model";
 import {OrderFilter} from "@/features/order-filter";
 import {crmService, getCachedChoices} from "@/entities/crm";
+import {getCurrentUser} from "@/entities/auth";
 
 interface OrderParamsProps {
     params: ISearchParams
@@ -14,20 +15,19 @@ export const OrdersPage = async ({params}: OrderParamsProps) => {
 
     const {page = '1', orderId} = params
 
-    const {ok: listOk, result: listData} = await orderService.getAllOrders({...params});
+    // Independent of each other — fetched in one round instead of a waterfall.
+    // getCurrentUser() only warms the per-render cache that OrderTable reads.
+    const [listResponse, detailResponse, choices, groupsResponse] = await Promise.all([
+        orderService.getAllOrders({...params}),
+        orderId ? orderService.getOrderById<ICommentResponse>(orderId) : Promise.resolve(null),
+        getCachedChoices(),
+        crmService.getGroups(),
+        getCurrentUser(),
+    ]);
 
-    let activeOrderDetails = null;
-
-    if (orderId) {
-        const {ok: detailOk, result: detailData} = await orderService.getOrderById<ICommentResponse>(orderId);
-        if (detailOk) {
-            activeOrderDetails = detailData;
-        }
-    }
-
-    const choices = await getCachedChoices()
-
-    const {ok: groupsOk, result: groupsData} = await crmService.getGroups()
+    const {ok: listOk, result: listData} = listResponse;
+    const {ok: groupsOk, result: groupsData} = groupsResponse;
+    const activeOrderDetails = detailResponse?.ok ? detailResponse.result : null;
     if (!listOk || !groupsOk) {
         return(
             <div>
