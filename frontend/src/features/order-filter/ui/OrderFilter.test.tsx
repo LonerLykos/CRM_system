@@ -5,9 +5,10 @@ import userEvent from '@testing-library/user-event'
 
 // --- Mock next/navigation ---
 const mockReplace = vi.fn()
+const mockRefresh = vi.fn()
 vi.mock('next/navigation', () => ({
     usePathname: () => '/crm',
-    useRouter: () => ({ replace: mockReplace }),
+    useRouter: () => ({ replace: mockReplace, refresh: mockRefresh }),
     useSearchParams: () => new URLSearchParams(),
 }))
 
@@ -84,6 +85,20 @@ const lastUrl = () => mockReplace.mock.calls.at(-1)![0] as string
 describe('OrderFilter', () => {
     beforeEach(() => {
         mockReplace.mockReset()
+        mockRefresh.mockReset()
+    })
+
+    // ── Refresh button ────────────────────────────────────────────────────────
+
+    describe('given active filters and a page', () => {
+        it('when the user clicks Refresh list, then data is re-read and the URL is untouched', async () => {
+            renderFilter({ name_contains: 'John', page: '3', order: '-id' })
+
+            await userEvent.click(screen.getByRole('button', { name: /refresh list/i }))
+
+            expect(mockRefresh).toHaveBeenCalledTimes(1)
+            expect(mockReplace).not.toHaveBeenCalled()
+        })
     })
 
     // ── Text inputs ───────────────────────────────────────────────────────────

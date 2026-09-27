@@ -32,12 +32,18 @@ class OrderService:
         updated_fields = set()
 
         if order.manager is None:
+            claim = {}
             if not data.get("status") or (data.get("status") and data["status"] != StatusChoices.NEW):
-                order.manager = self.user
-                updated_fields.add('manager')
+                claim['manager'] = self.user
             if not data.get("status") and order.status in [None, '', StatusChoices.NEW]:
-                order.status = 'in_work'
-                updated_fields.add('status')
+                claim['status'] = 'in_work'
+
+            if claim:
+                taken = OrdersModel.objects.filter(pk=order_id, manager__isnull=True).update(**claim)
+                if not taken:
+                    raise OrderPermissionDenied()
+                for field, value in claim.items():
+                    setattr(order, field, value)
 
         editable_fields = [
             'name', 'surname', 'email', 'phone', 'age',

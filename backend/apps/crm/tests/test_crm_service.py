@@ -9,10 +9,12 @@ Covers:
 - Editable fields are updated
 - Non-editable fields are ignored
 - course normalisation: lowercase input → stored UPPER
+- a concurrent claim of the same ownerless order is refused
 """
 import pytest
 from core.exceptions.orders_exceptions import OrderNotFound, OrderPermissionDenied
 
+from apps.crm.models.orders_model import OrdersModel
 from apps.crm.services.order_services import OrderService
 
 
@@ -159,3 +161,24 @@ def test_update_status_new_does_not_assign_manager_to_ownerless(order_no_manager
 
     updated.refresh_from_db()
     assert updated.manager is None
+
+
+@pytest.mark.django_db
+def test_update_refuses_order_claimed_in_the_meantime(order_no_manager, manager_user, another_manager):
+    """
+    Another manager claimed the order between the read and the write: the second
+    claim must be refused instead of silently taking the order over.
+    """
+    service = OrderService(user=manager_user)
+    stale = service.order_selector.get_by_id(pk=order_no_manager.pk)
+    assert stale.manager is None
+
+    OrdersModel.objects.filter(pk=order_no_manager.pk).update(manager=another_manager)
+    service.order_selector.get_by_id = lambda pk: stale
+
+    with pytest.raises(OrderPermissionDenied):
+        service.update(order_id=order_no_manager.pk, data={"name": "Race"})
+
+    order_no_manager.refresh_from_db()
+    assert order_no_manager.manager == another_manager
+    assert order_no_manager.name != "Race"

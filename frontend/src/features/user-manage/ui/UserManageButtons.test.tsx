@@ -153,6 +153,21 @@ describe('UserManageButtons', () => {
         })
     })
 
+    // ── Own row ───────────────────────────────────────────────────────────────
+
+    describe('given the row is the logged-in admin', () => {
+        it('then neither Ban nor Recovery password can be used', async () => {
+            render(<UserManageButtons pk={1} isActive={true} isBanned={false} isSelf />)
+
+            const recovery = screen.getByRole('button', { name: /recovery password/i })
+            expect(recovery).toBeDisabled()
+            expect(screen.getByRole('button', { name: /^ban$/i })).toBeDisabled()
+
+            await userEvent.click(recovery)
+            expect(restorePasswordActionMock).not.toHaveBeenCalled()
+        })
+    })
+
     // ── Ban button ────────────────────────────────────────────────────────────
 
     describe('given an active, non-banned user', () => {

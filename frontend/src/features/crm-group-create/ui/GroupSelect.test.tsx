@@ -65,6 +65,18 @@ describe('GroupSelect', () => {
             expect(selectedId(container)).toBe('5')
         })
 
+        it('when the group already exists on the server, then it is pulled in and selected', async () => {
+            groupCreateActionMock.mockResolvedValue({ group: { id: 9, name: 'Group B' }, existing: true })
+            const { container } = render(<GroupSelect groups={[]} />)
+
+            await userEvent.type(searchInput(), 'Group B')
+            await userEvent.click(addButton())
+
+            expect(await screen.findByText('Group “Group B” already exists — selected it')).toBeInTheDocument()
+            expect(selectedId(container)).toBe('9')
+            expect(addButton()).toBeDisabled()
+        })
+
         it('when the server rejects it as a duplicate, then the message is shown and nothing is selected', async () => {
             groupCreateActionMock.mockResolvedValue({ error: 'Group with this name already exists' })
             const { container } = render(<GroupSelect groups={[]} />)

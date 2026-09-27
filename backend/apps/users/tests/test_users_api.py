@@ -318,6 +318,22 @@ def test_admin_cannot_deactivate_self_returns_403():
 # ---------------------------------------------------------------------------
 
 @pytest.mark.django_db
+def test_admin_cannot_restore_own_password_returns_403():
+    """An admin may not reset their own password — same guard as ban/deactivate."""
+    admin = User.objects.create_superuser(
+        email="selfpwd@test.com", password="pass", name="Self", surname="Pwd"
+    )
+    client = APIClient()
+    client.force_authenticate(user=admin)
+
+    resp = client.patch(restore_pwd_url(admin.pk))
+
+    assert resp.status_code == 403
+    admin.refresh_from_db()
+    assert admin.check_password("pass")
+
+
+@pytest.mark.django_db
 def test_restore_password_returns_200_and_link(admin_client, target_user):
     resp = admin_client.patch(restore_pwd_url(target_user.pk))
     assert resp.status_code == 200

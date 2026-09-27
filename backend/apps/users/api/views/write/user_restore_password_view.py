@@ -36,12 +36,12 @@ class UserRestorePasswordView(APIView):
             'Generates a new one-time PasswordToken for the given user, '
             'invalidates any previously set password, and returns the token '
             'together with a ready-to-use password-set link. '
-            'Admin-only endpoint.'
+            'Admin-only endpoint; an admin cannot reset their own password (403).'
         ),
     )
     def patch(self, request, *args, **kwargs):
         user_id = self.kwargs['pk']
-        token, user = UserService.user_restore_password(user_id)
+        token, user = UserService.user_restore_password(user_id, request.user.id)
         url = f'{settings.FRONTEND_URL}/set-password/{token}'
         response = Response({
             'details': f'User: {user.name}, ID: {user.id} created',

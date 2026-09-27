@@ -116,14 +116,13 @@ select.control
   align-items: center
   gap: 6px
 
-// Icon buttons: Reset (button) and Export (anchor) share this look.
 .iconBtn
   all: unset
   display: inline-flex
   align-items: center
   justify-content: center
-  width: 34px
-  height: 34px
+  width: 32px
+  height: 32px
   border-radius: 6px
   cursor: pointer
   transition: background 0.15s ease, transform 0.1s ease
@@ -133,3 +132,7 @@ select.control
 
   &:active
     transform: scale(0.94)
+
+  &:disabled
+    opacity: 0.5
+    cursor: not-allowed

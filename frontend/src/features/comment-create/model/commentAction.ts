@@ -1,46 +1,49 @@
 'use server'
 
 import {commentSchema} from "@/features/comment-create";
-import {redirect} from "next/navigation";
-import {extractApiError, rebuildParams} from "@/shared/libs";
+import {extractApiError} from "@/shared/libs";
 import {commentService} from "@/entities/comment";
 import {ISearchParams} from "@/shared/model";
 import {revalidatePath} from "next/cache";
 
+export type CommentActionState =
+    | {ok: true; at: number}
+    | {ok: false; error: string}
+    | null;
 
-export async function commentAction(formData: FormData) {
-    const comment = formData.get('comment')
-    const validatedFields = commentSchema.safeParse({comment: comment})
-
+export async function commentAction(
+    prevState: CommentActionState,
+    formData: FormData,
+): Promise<CommentActionState> {
     const rawParams = formData.get('params')
     const params: ISearchParams = (typeof rawParams === 'string')
         ? JSON.parse(rawParams)
         : {}
 
+    const validatedFields = commentSchema.safeParse({comment: formData.get('comment')})
+
     if (!validatedFields.success) {
-        const errorMsg = validatedFields.error.issues[0].message
-        redirect(`/crm?${rebuildParams(params, {error: errorMsg})}`)
+        return {ok: false, error: validatedFields.error.issues[0].message}
     }
 
-    if (Object.keys(params).length >= 1 && params.orderId) {
-        const {ok, status, error} = await commentService.createComment(
-            validatedFields.data,
-            params.orderId
-        )
+    if (!params.orderId) {
+        return {ok: false, error: 'You need to choose order'}
+    }
 
-        if (ok) {
-            revalidatePath('/', 'layout')
-            redirect(`/crm?${rebuildParams(params, {error: ''})}`)
-        }
+    const {ok, status, error} = await commentService.createComment(
+        validatedFields.data,
+        params.orderId
+    )
 
-        const errorMsg = status === 500
+    if (ok) {
+        revalidatePath('/', 'layout')
+        return {ok: true, at: Date.now()}
+    }
+
+    return {
+        ok: false,
+        error: status === 500
             ? 'The server is not responding'
-            : extractApiError(error, 'Failed to add comment')
-        redirect(`/crm?${rebuildParams(params, {error: errorMsg})}`)
-    } else {
-        redirect(`/crm?${rebuildParams(
-            params,
-            {error: 'You need to choose order'}
-        )}`)
+            : extractApiError(error, 'Failed to add comment'),
     }
 }

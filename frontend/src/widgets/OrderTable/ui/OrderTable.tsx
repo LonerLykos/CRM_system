@@ -1,13 +1,13 @@
 import React from "react";
 import Link from "next/link";
-import {columns, IOrderResponse, IOrderDetailResponse, orderingToggle, OrderRow} from "@/entities/order";
+import {columns, IOrderResponse, IOrderDetailResponse, orderingToggle, OrderRow, sortDirection} from "@/entities/order";
 import {CommentDetail, ICommentResponse} from "@/entities/comment";
 import {ISearchParams} from "@/shared/model";
 import {rebuildParams} from "@/shared/libs";
 import s from './OrderTable.module.sass';
 import {CommentForm} from "@/features/comment-create";
 import {OrderUpdateForm} from "@/features/order-update";
-import {authService} from "@/entities/auth";
+import {getCurrentUser} from "@/entities/auth";
 
 interface OrderTableProps {
     orders: IOrderResponse[];
@@ -30,13 +30,12 @@ export const OrderTable = async ({
         return `/crm?${query}`;
     };
 
-    const error = params.error
     const update_order = params.update_order
 
     // Current user — used only to mirror the backend ownership guard in the UI
     // (backend stays the real gate). The order carries the owner's `manager_id`
     // and getMe exposes the user `id`, so ownership is compared by id.
-    const {result: me} = await authService.getMe()
+    const {result: me} = await getCurrentUser()
 
     return (
         <table className={s.ordersTable}>
@@ -47,8 +46,8 @@ export const OrderTable = async ({
                         <Link href={getSortHref(key)}>
                             {label}
                             <span className={s.arrow}>
-                                {params.order?.includes(key) &&
-                                    (params.order.startsWith('-') ? '\u2193' : '\u2191')}
+                                {sortDirection(params.order, key) === 'asc' && '\u2191'}
+                                {sortDirection(params.order, key) === 'desc' && '\u2193'}
                             </span>
                         </Link>
                     </th>
@@ -86,7 +85,6 @@ export const OrderTable = async ({
                                                 {locked && (
                                                     <p className={s.ownerMsg}>You are not owner of this order</p>
                                                 )}
-                                                <p className={s.errorMsg}>{error && error}</p>
                                             </div>
                                         </div>
 

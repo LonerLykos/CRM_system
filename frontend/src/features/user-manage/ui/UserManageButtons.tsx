@@ -8,7 +8,6 @@ interface UserManageButtonsProps {
     pk: number;
     isActive: boolean;
     isBanned: boolean;
-    /** True when this row is the logged-in user — the Ban button is then locked. */
     isSelf?: boolean;
 }
 
@@ -56,16 +55,18 @@ export const UserManageButtons = ({pk, isActive, isBanned, isSelf}: UserManageBu
             {!isActive ? (
                 <button
                     className={`${s.btn} ${s.activate}`}
-                    disabled={isPending}
+                    disabled={isPending || isSelf}
                     onClick={handlePasswordAction}
+                    title={isSelf ? 'You cannot reset your own password' : undefined}
                 >
                     {isPending ? '…' : 'Activate'}
                 </button>
             ) : (
                 <button
                     className={`${s.btn} ${s.recovery}`}
-                    disabled={isPending}
+                    disabled={isPending || isSelf}
                     onClick={handlePasswordAction}
+                    title={isSelf ? 'You cannot reset your own password' : undefined}
                 >
                     {isPending ? '…' : 'Recovery password'}
                 </button>

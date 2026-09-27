@@ -3,7 +3,7 @@
 import {ISearchParams} from "@/shared/model";
 import Image from "next/image";
 import {usePathname, useRouter} from "next/navigation";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState, useTransition} from "react";
 import {useDebouncedCallback} from "use-debounce";
 import {filterSet} from "@/features/order-filter";
 import {IChoicesResponse, IGroupResponse} from "@/entities/crm";
@@ -41,7 +41,7 @@ const paramsToValues = (params: ISearchParams): ValueMap => {
 
 export const OrderFilter = ({params, choices, groups}: FilterProp) => {
     const pathname = usePathname();
-    const {replace} = useRouter();
+    const {replace, refresh} = useRouter();
 
     // Controlled state mirrors the URL params. With uncontrolled `defaultValue`
     // the inputs only read the params once (on mount), so Reset cleared the
@@ -141,6 +141,12 @@ export const OrderFilter = ({params, choices, groups}: FilterProp) => {
         valuesRef.current = cleared;
         setValues(cleared);   // clear the fields immediately
         replace(`${pathname}?${newParams.toString()}`, {scroll: false});
+    };
+
+    const [isRefreshing, startRefresh] = useTransition();
+
+    const handleRefresh = () => {
+        startRefresh(() => refresh());
     };
 
     const paramValue = (key: string): string => values[key] ?? '';
@@ -247,13 +253,22 @@ export const OrderFilter = ({params, choices, groups}: FilterProp) => {
                 <div className={styles.iconRow}>
                     <button
                         type="button"
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                        title="Refresh list"
+                        className={styles.iconBtn}
+                    >
+                        <Image src="/icons/reload.png" alt="Refresh list" width={30} height={30}/>
+                    </button>
+                    <ExportButton params={params} className={styles.iconBtn}/>
+                    <button
+                        type="button"
                         onClick={handleResetFilters}
                         title="Reset filters"
                         className={styles.iconBtn}
                     >
-                        <Image src="/icons/restore.png" alt="Reset filters" width={22} height={22}/>
+                        <Image src="/icons/reset.png" alt="Reset filters" width={30} height={30}/>
                     </button>
-                    <ExportButton params={params} className={styles.iconBtn}/>
                 </div>
             </div>
         </div>

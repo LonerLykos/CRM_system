@@ -7,6 +7,7 @@ import {groupCreateSchema} from "./groupCreateSchema";
 
 export interface GroupCreateResult {
     group?: IGroupResponse;
+    existing?: boolean;
     error?: string;
 }
 
@@ -26,6 +27,15 @@ export async function groupCreateAction(name: string): Promise<GroupCreateResult
 
     if (status === 500) {
         return {error: 'The server is not responding'};
+    }
+
+    const {ok: listOk, result: groups} = await crmService.getGroups();
+    const existing = listOk
+        ? groups?.find((group) => group.name === validated.data.name.trim())
+        : undefined;
+
+    if (existing) {
+        return {group: existing, existing: true};
     }
 
     return {error: extractApiError(error, 'Failed to create group')};

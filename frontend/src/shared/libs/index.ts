@@ -5,6 +5,7 @@
 export {logoutAndRedirect} from './middleware/logout-and-redirect';
 export {getDynamicSlots} from './pagination/getDynamicSlots';
 export {formatDate} from './formatDate/formatDate';
+export {formatDateTime} from './formatDate/formatDateTime';
 export {rebuildParams} from './url/rebuildParams';
 export {cleanParams} from './url/cleanParams';
 export {extractApiError} from './errors/extractApiError';

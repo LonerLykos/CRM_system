@@ -57,7 +57,7 @@ and rotated per environment.
 | Async tasks  | Celery 5.4 + Redis 7 (broker and result backend)                      |
 | Excel export | openpyxl 3.1                                                          |
 | API docs     | drf-spectacular (OpenAPI 3 + Swagger UI)                              |
-| WSGI server  | gunicorn 26 (3 workers)                                               |
+| WSGI server  | gunicorn 26 (10 workers)                                              |
 | Frontend     | Next.js 16.1.6 (App Router), React 19.2, TypeScript 5                 |
 | Forms        | react-hook-form 7.71, zod 4.3                                         |
 | Styling      | Sass modules                                                          |

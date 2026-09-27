@@ -88,13 +88,15 @@ export const GroupSelect = ({
         setNotice(null);
         startTransition(async () => {
             const res = await groupCreateAction(typedName);
-            if (res.error || !res.group) {
+            if (!res.group) {
                 setError(res.error ?? 'Failed to create group');
                 return;
             }
             const group = res.group;
-            setNotice(`Group “${group.name}” created`);
-            setGroups((prev) => [...prev, group]);
+            setNotice(res.existing
+                ? `Group “${group.name}” already exists — selected it`
+                : `Group “${group.name}” created`);
+            setGroups((prev) => prev.some((g) => g.id === group.id) ? prev : [...prev, group]);
             setSelectedId(group.id);
             setQuery(group.name);
             setOpen(false);

@@ -7,6 +7,7 @@ Coverage:
 - set_banned()     → writes the requested is_banned; repeating it is a no-op
 - self-action guard → an admin can't ban / deactivate themselves
 - user_restore_password() → returns new PasswordToken; password becomes unusable
+- user_restore_password() on self → SelfActionDenied
 - user_set_password()  → sets password + activates user
 - token one-time use   → second call raises JWTException
 """
@@ -165,6 +166,18 @@ def test_set_active_on_self_is_denied(active_user):
 # ---------------------------------------------------------------------------
 # user_restore_password()
 # ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_restore_password_on_self_is_denied(active_user):
+    active_user.set_password("realpassword")
+    active_user.save()
+
+    with pytest.raises(SelfActionDenied):
+        UserService.user_restore_password(active_user.pk, requester_id=active_user.pk)
+
+    active_user.refresh_from_db()
+    assert active_user.check_password("realpassword")
+
 
 @pytest.mark.django_db
 def test_restore_password_returns_token_and_user(active_user):

@@ -57,10 +57,8 @@ class UserService:
         return current_user
 
     @classmethod
-    def user_restore_password(cls, user_id):
-        current_user = cls.user_selector.get_by_id(user_id)
-        if not current_user:
-            raise UserNotFound()
+    def user_restore_password(cls, user_id, requester_id=None):
+        current_user = cls._get_other_user(user_id, requester_id)
         current_user.set_unusable_password()
         current_user.save()
         token = JWTService.create_token(current_user, PasswordToken)

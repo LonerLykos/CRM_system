@@ -23,6 +23,6 @@ EXCEPTION_MAP = {
     },
     'SelfActionDenied': {
         'status': status.HTTP_403_FORBIDDEN,
-        'detail': 'You cannot ban or deactivate your own account'
+        'detail': 'You cannot perform this action on your own account'
     },
 }
