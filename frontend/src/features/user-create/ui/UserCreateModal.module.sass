@@ -96,6 +96,20 @@
     opacity: 0.6
     cursor: not-allowed
 
+.cancelBtn
+  margin-top: 4px
+  padding: 10px
+  background-color: var(--danger-fill)
+  color: var(--on-fill)
+  border: none
+  border-radius: 6px
+  font-size: 0.95rem
+  font-weight: 600
+  cursor: pointer
+  transition: background 0.2s
+  &:hover:not(:disabled)
+    background-color: var(--danger-fill-hover)
+
 .success
   display: flex
   flex-direction: column

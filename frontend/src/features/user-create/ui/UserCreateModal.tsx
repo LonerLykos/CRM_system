@@ -97,6 +97,9 @@ export const UserCreateModal = () => {
                                 >
                                     {isPending ? 'Creating…' : 'Create'}
                                 </button>
+                                <button className={s.cancelBtn} onClick={handleClose}>
+                                    Cancel
+                                </button>
                             </form>
                         )}
                     </div>
