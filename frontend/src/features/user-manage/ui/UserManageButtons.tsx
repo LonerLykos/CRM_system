@@ -39,10 +39,19 @@ export const UserManageButtons = ({pk, isActive, isBanned, isSelf}: UserManageBu
         });
     };
 
-    const handleBanChange = () => {
+    const handleBanChange = (ban: boolean) => {
         setErrorMsg(null);
         startTransition(async () => {
-            const result = isBanned ? await unbanUserAction(pk) : await banUserAction(pk);
+
+            let result;
+
+            if (ban) {
+                result = await banUserAction(pk);
+            }
+            else {
+                result = await unbanUserAction(pk);
+            }
+
             if (!result.ok) {
                 setErrorMsg(result.error);
             }
@@ -74,12 +83,20 @@ export const UserManageButtons = ({pk, isActive, isBanned, isSelf}: UserManageBu
 
             {/* Ban / Unban — you can never ban your own account */}
             <button
-                className={`${s.btn} ${isBanned ? s.unban : s.ban}`}
-                disabled={isPending || isSelf}
-                onClick={handleBanChange}
+                className={`${s.btn} ${s.ban}`}
+                disabled={isPending || isSelf || isBanned}
+                onClick={() => handleBanChange(true)}
                 title={isSelf ? 'You cannot ban your own account' : undefined}
             >
-                {isPending ? '…' : isBanned ? 'Unban' : 'Ban'}
+                {isPending ? '…' : 'Ban'}
+            </button>
+            <button
+                className={`${s.btn} ${s.unban}`}
+                disabled={isPending || isSelf || !isBanned}
+                onClick={() => handleBanChange(false)}
+                title={isSelf ? 'You cannot unban your own account' : undefined}
+            >
+                {isPending ? '…' : 'Unban'}
             </button>
 
             {/* Link feedback */}

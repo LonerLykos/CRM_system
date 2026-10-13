@@ -49,9 +49,9 @@ describe('UserManageButtons', () => {
             render(<UserManageButtons pk={1} isActive={false} isBanned={false} />)
 
             expect(screen.getByRole('button', { name: /activate/i })).toBeInTheDocument()
-            expect(screen.getByRole('button', { name: /ban/i })).toBeInTheDocument()
+            expect(screen.getByRole('button', { name: /^ban$/i })).toBeEnabled()
             expect(screen.queryByRole('button', { name: /recovery password/i })).not.toBeInTheDocument()
-            expect(screen.queryByRole('button', { name: /unban/i })).not.toBeInTheDocument()
+            expect(screen.getByRole('button', { name: /unban/i })).toBeDisabled()
         })
     })
 
@@ -60,8 +60,9 @@ describe('UserManageButtons', () => {
             render(<UserManageButtons pk={2} isActive={true} isBanned={false} />)
 
             expect(screen.getByRole('button', { name: /recovery password/i })).toBeInTheDocument()
-            expect(screen.getByRole('button', { name: /ban/i })).toBeInTheDocument()
+            expect(screen.getByRole('button', { name: /^ban$/i })).toBeEnabled()
             expect(screen.queryByRole('button', { name: /^activate$/i })).not.toBeInTheDocument()
+            expect(screen.getByRole('button', { name: /unban/i })).toBeDisabled()
         })
     })
 
@@ -69,8 +70,8 @@ describe('UserManageButtons', () => {
         it('when rendered, then Unban button is shown instead of Ban', () => {
             render(<UserManageButtons pk={3} isActive={true} isBanned={true} />)
 
-            expect(screen.getByRole('button', { name: /unban/i })).toBeInTheDocument()
-            expect(screen.queryByRole('button', { name: /^ban$/i })).not.toBeInTheDocument()
+            expect(screen.getByRole('button', { name: /unban/i })).toBeEnabled()
+            expect(screen.getByRole('button', { name: /^ban$/i })).toBeDisabled()
         })
     })
 
